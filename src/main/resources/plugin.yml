@@ -1,0 +1,38 @@
+main: com.cavetale.bingo.BingoPlugin
+
+name: Bingo
+version: 0.1
+description: Bingo Scavenger Hunt Event
+api-version: 1.13
+
+author: StarTux
+website: https://github.com/StarTux/Bingo
+
+depend: [Core, Mytems]
+softdepend: []
+
+commands:
+
+  bingo:
+    aliases: []
+    description: Check your progress
+    permission: bingo.bingo
+    usage: |-
+      /bingo - Check your progress
+
+  bingoadmin:
+    aliases: [bingoadm]
+    description: Bingo Admin Command
+    permission: bingo.bingo
+    usage: |-
+      /bingoadmin
+
+permissions:
+
+  bingo.bingo:
+    description: Use /bingo
+    default: op
+
+  bingo.admin:
+    description: Use /bingoadmin
+    default: op
