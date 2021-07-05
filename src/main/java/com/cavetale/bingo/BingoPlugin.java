@@ -120,7 +120,7 @@ public final class BingoPlugin extends JavaPlugin {
 
     void save() {
         getDataFolder().mkdirs();
-        Json.save(new File(getDataFolder(), "save.json"), tag);
+        Json.save(new File(getDataFolder(), "save.json"), tag, true);
     }
 
     public Tag.Player getPlayerTag(Player player) {
