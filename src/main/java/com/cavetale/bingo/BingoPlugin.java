@@ -14,7 +14,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
-import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -90,21 +90,15 @@ public final class BingoPlugin extends JavaPlugin {
         bingoAdminCommand.enable();
         eventListener.enable();
         load();
-        String json = """
-        {
-            "text": "",
-            "bold": true,
-            "extra": [
-                {"text":"B","color":"#ff4500"},
-                {"text":"i","color":"#ffa500"},
-                {"text":"n","color":"#00ff00"},
-                {"text":"g","color":"#8080ff"},
-                {"text":"o","color":"#cd5c5c"},
-                {"text":"!","color":"#ffd700"}
-            ]
-        }
-            """;
-        bingoComponent = GsonComponentSerializer.gson().deserialize(json);
+        bingoComponent = Component.text()
+            .decorate(TextDecoration.BOLD)
+            .append(Component.text("B", TextColor.color(0xff4500)))
+            .append(Component.text("i", TextColor.color(0xffa500)))
+            .append(Component.text("n", TextColor.color(0x00ff00)))
+            .append(Component.text("g", TextColor.color(0x8080ff)))
+            .append(Component.text("o", TextColor.color(0xcd5c5c)))
+            .append(Component.text("!", TextColor.color(0xffd700)))
+            .build();
         Gui.enable(this);
     }
 
