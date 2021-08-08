@@ -74,6 +74,13 @@ public final class BingoPlugin extends JavaPlugin {
         Material.POINTED_DRIPSTONE,
         Material.TINTED_GLASS,
         Material.TUFF,
+        // August 2021
+        Material.OBSERVER,
+        Material.DAYLIGHT_DETECTOR,
+        Material.LEAD,
+        Material.JACK_O_LANTERN,
+        Material.FIRE_CHARGE,
+        Material.CAKE,
     };
     /**
      * Initialized in onEnable(). Shuffled all the time to produce new
