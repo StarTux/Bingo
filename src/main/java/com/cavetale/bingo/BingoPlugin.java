@@ -92,7 +92,7 @@ public final class BingoPlugin extends JavaPlugin {
     @Override
     public void onEnable() {
         Set<Material> materialSet = EnumSet.of(materialArray[0], materialArray);
-        materialList = new ArrayList(materialSet);
+        materialList = new ArrayList<>(materialSet);
         bingoCommand.enable();
         bingoAdminCommand.enable();
         eventListener.enable();
@@ -148,7 +148,7 @@ public final class BingoPlugin extends JavaPlugin {
             }
         }
         int size = 5 * 9;
-        Component guiTitle = TextComponent.ofChildren(DefaultFont.guiBlankOverlay(size, TextColor.color(0x200020)),
+        Component guiTitle = TextComponent.ofChildren(DefaultFont.guiBlankOverlay(size, TextColor.color(0xFF00FF)),
                                                       bingoComponent,
                                                       Component.space(),
                                                       Component.text("Collect 5 in a row!", NamedTextColor.WHITE));

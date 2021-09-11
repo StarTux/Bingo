@@ -1,13 +1,11 @@
 package com.cavetale.bingo;
 
-import com.cavetale.core.font.VanillaItems;
 import com.cavetale.sidebar.PlayerSidebarEvent;
 import com.cavetale.sidebar.Priority;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -15,8 +13,10 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.inventory.ItemStack;
 
 @RequiredArgsConstructor
 public final class EventListener implements Listener {
@@ -51,5 +51,27 @@ public final class EventListener implements Listener {
         //     list.add(line.build());
         // }
         event.add(plugin, Priority.HIGH, list);
+    }
+
+    @EventHandler
+    private void onEntityDeath(EntityDeathEvent event) {
+        switch (event.getEntityType()) {
+        case ENDERMAN:
+            if (event.getDrops().isEmpty()) {
+                event.getDrops().add(new ItemStack(Material.ENDER_PEARL));
+            }
+            break;
+        case MAGMA_CUBE:
+            if (event.getDrops().isEmpty()) {
+                event.getDrops().add(new ItemStack(Material.MAGMA_CREAM));
+            }
+            break;
+        case BLAZE:
+            if (event.getDrops().isEmpty()) {
+                event.getDrops().add(new ItemStack(Material.BLAZE_ROD));
+            }
+            break;
+        default: break;
+        }
     }
 }
