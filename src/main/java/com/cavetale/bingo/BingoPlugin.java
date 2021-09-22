@@ -220,6 +220,7 @@ public final class BingoPlugin extends JavaPlugin {
         for (Player target : Bukkit.getOnlinePlayers()) {
             target.sendMessage(ChatColor.GREEN + player.getName() + " has a Bingo!");
         }
+        getLogger().info(player.getName() + " has a Bingo!");
         player.getInventory().clear();
         player.getEnderChest().clear();
         Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "ml add " + player.getName());
