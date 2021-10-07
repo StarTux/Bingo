@@ -3,6 +3,7 @@ package com.cavetale.bingo;
 import com.cavetale.core.font.DefaultFont;
 import com.cavetale.mytems.Mytems;
 import java.io.File;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumSet;
@@ -11,10 +12,11 @@ import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.JoinConfiguration;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
+import net.kyori.adventure.title.Title;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -147,15 +149,19 @@ public final class BingoPlugin extends JavaPlugin {
                 has.add(mat);
             }
         }
-        int size = 5 * 9;
-        Component guiTitle = TextComponent.ofChildren(DefaultFont.guiBlankOverlay(size, TextColor.color(0xFF00FF)),
-                                                      bingoComponent,
-                                                      Component.space(),
-                                                      Component.text("Collect 5 in a row!", NamedTextColor.WHITE));
-        player.sendMessage(TextComponent.ofChildren(bingoComponent,
-                                                    Component.space(),
-                                                    Component.text("Collect 5 in a row, column, or diagonal!", NamedTextColor.WHITE)));
-        Gui gui = new Gui(this).size(size).title(guiTitle);
+        player.sendMessage(Component.join(JoinConfiguration.noSeparators(),
+                                          bingoComponent,
+                                          Component.space(),
+                                          Component.text("Collect 5 in a row, column, or diagonal!", NamedTextColor.WHITE)));
+        final int size = 5 * 9;
+        Component guiTitle = Component.join(JoinConfiguration.noSeparators(), new Component[] {
+                bingoComponent,
+                Component.space(),
+                Component.text("Collect 5 in a row!", NamedTextColor.WHITE),
+            });
+        Gui gui = new Gui(this)
+            .size(size)
+            .title(DefaultFont.guiBlankOverlay(size, TextColor.color(0xFF00FF), guiTitle));
         for (int column = 0; column < 5; column += 1) {
             for (int row = 0; row < 5; row += 1) {
                 Material material = playerTag.materialList.get(column + row * 5);
@@ -207,7 +213,11 @@ public final class BingoPlugin extends JavaPlugin {
         if (bingo) {
             playerHasBingo(player);
             gui.onClose(ce -> {
-                    player.sendTitle("" + ChatColor.GREEN + ChatColor.BOLD + "Bingo!", "", 20, 20, 20);
+                    player.showTitle(Title.title(Component.text("Bingo!", NamedTextColor.GREEN, TextDecoration.BOLD),
+                                                 Component.empty(),
+                                                 Title.Times.of(Duration.ofSeconds(1),
+                                                                Duration.ofSeconds(1),
+                                                                Duration.ofSeconds(1))));
                     Bukkit.getScheduler().runTaskLater(this, () -> {
                             Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "titles unlockset " + player.getName() + " Bingo");
                         }, 60L);
