@@ -18,7 +18,6 @@ import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.title.Title;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -211,30 +210,36 @@ public final class BingoPlugin extends JavaPlugin {
             bingo = true;
         } while (false);
         if (bingo) {
-            playerHasBingo(player);
-            gui.onClose(ce -> {
-                    player.showTitle(Title.title(Component.text("Bingo!", NamedTextColor.GREEN, TextDecoration.BOLD),
-                                                 Component.empty(),
-                                                 Title.Times.of(Duration.ofSeconds(1),
-                                                                Duration.ofSeconds(1),
-                                                                Duration.ofSeconds(1))));
-                    Bukkit.getScheduler().runTaskLater(this, () -> {
-                            Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "titles unlockset " + player.getName() + " Bingo");
-                        }, 60L);
-                });
+            tag.completed.put(player.getUniqueId(), player.getName());
+            save();
+            gui.onClose(evt -> playerHasBingo(player));
         }
     }
 
     public void playerHasBingo(Player player) {
-        tag.completed.put(player.getUniqueId(), player.getName());
-        save();
-        for (Player target : Bukkit.getOnlinePlayers()) {
-            target.sendMessage(ChatColor.GREEN + player.getName() + " has a Bingo!");
-        }
-        getLogger().info(player.getName() + " has a Bingo!");
+        // Clear
         player.getInventory().clear();
         player.getEnderChest().clear();
+        // Announce
+        getLogger().info(player.getName() + " has a Bingo!");
+        for (Player target : Bukkit.getOnlinePlayers()) {
+            target.sendMessage(Component.join(JoinConfiguration.separator(Component.newline()), new Component[] {
+                        Component.empty(),
+                        Component.text(player.getName() + " has a ", NamedTextColor.GREEN).append(bingoComponent),
+                        Component.empty(),
+                    }));
+        }
+        player.showTitle(Title.title(bingoComponent,
+                                     Component.text("Congratulations!", NamedTextColor.GREEN),
+                                     Title.Times.of(Duration.ofSeconds(1),
+                                                    Duration.ofSeconds(1),
+                                                    Duration.ofSeconds(1))));
+        // MemberList and Title
         Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "ml add " + player.getName());
+        Bukkit.getScheduler().runTaskLater(this, () -> {
+                Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "titles unlockset " + player.getName() + " Bingo");
+            }, 60L);
+        // Random reward
         List<Mytems> list = List.of(Mytems.PAN_FLUTE,
                                     Mytems.TRIANGLE,
                                     Mytems.WOODEN_LUTE,
