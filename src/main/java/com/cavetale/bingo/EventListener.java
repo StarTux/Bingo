@@ -79,6 +79,7 @@ public final class EventListener implements Listener {
 
     @EventHandler
     private void onDungeonLoot(DungeonLootEvent event) {
+        if (event.getDungeon().isRaided()) return;
         Player player = event.getPlayer();
         List<Material> materialList = plugin.getPlayerTag(player).materialList;
         Material material = materialList.get(plugin.random.nextInt(materialList.size()));
