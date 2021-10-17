@@ -35,16 +35,17 @@
   </build>
   <repositories>
 
-    <!-- Paper Repo -->
-    <repository>
-      <id>papermc</id>
-      <url>https://papermc.io/repo/repository/maven-public/</url>
-    </repository>
-
     <!-- Cavetale Repo -->
     <repository>
       <id>cavetale</id>
       <url>https://cavetale.com/jenkins/plugin/repository/everything/</url>
+    </repository>
+
+
+    <!-- Paper Repo -->
+    <repository>
+      <id>papermc</id>
+      <url>https://papermc.io/repo/repository/maven-public/</url>
     </repository>
 
   </repositories>
@@ -86,6 +87,14 @@
     <dependency>
       <groupId>com.cavetale.sidebar</groupId>
       <artifactId>sidebar</artifactId>
+      <version>0.1-SNAPSHOT</version>
+      <scope>provided</scope>
+    </dependency>
+
+    <!-- Dungeons -->
+    <dependency>
+      <groupId>com.cavetale.dungeons</groupId>
+      <artifactId>dungeons</artifactId>
       <version>0.1-SNAPSHOT</version>
       <scope>provided</scope>
     </dependency>

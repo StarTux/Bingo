@@ -12,6 +12,6 @@ public final class Tag {
     Map<UUID, Player> players = new HashMap<>();
 
     public static final class Player {
-        List<Material> materialList = new ArrayList<>();
+        protected List<Material> materialList = new ArrayList<>();
     }
 }
