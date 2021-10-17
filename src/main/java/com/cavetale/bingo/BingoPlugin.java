@@ -227,6 +227,7 @@ public final class BingoPlugin extends JavaPlugin {
 
     public void playerHasBingo(Player player) {
         tag.completed.put(player.getUniqueId(), player.getName());
+        save();
         for (Player target : Bukkit.getOnlinePlayers()) {
             target.sendMessage(ChatColor.GREEN + player.getName() + " has a Bingo!");
         }
@@ -234,6 +235,17 @@ public final class BingoPlugin extends JavaPlugin {
         player.getInventory().clear();
         player.getEnderChest().clear();
         Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "ml add " + player.getName());
-        save();
+        List<Mytems> list = List.of(Mytems.PAN_FLUTE,
+                                    Mytems.TRIANGLE,
+                                    Mytems.WOODEN_LUTE,
+                                    Mytems.WOODEN_OCARINA,
+                                    Mytems.BANJO,
+                                    Mytems.GUITAR,
+                                    Mytems.MUSICAL_BELL,
+                                    Mytems.COW_BELL,
+                                    Mytems.POCKET_PIANO,
+                                    Mytems.ELECTRIC_PIANO,
+                                    Mytems.IRON_XYLOPHONE);
+        player.getInventory().addItem(list.get(random.nextInt(list.size())).createItemStack(player));
     }
 }
