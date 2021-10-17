@@ -223,9 +223,15 @@ public final class BingoPlugin extends JavaPlugin {
         // Announce
         getLogger().info(player.getName() + " has a Bingo!");
         for (Player target : Bukkit.getOnlinePlayers()) {
+            Component message = Component.join(JoinConfiguration.noSeparators(), new Component[] {
+                    player.displayName(),
+                    Component.text(" has a ", NamedTextColor.GREEN),
+                    bingoComponent,
+                });
+            target.sendActionBar(message);
             target.sendMessage(Component.join(JoinConfiguration.separator(Component.newline()), new Component[] {
                         Component.empty(),
-                        Component.text(player.getName() + " has a ", NamedTextColor.GREEN).append(bingoComponent),
+                        message,
                         Component.empty(),
                     }));
         }
