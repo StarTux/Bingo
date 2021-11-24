@@ -1,6 +1,6 @@
 package com.cavetale.bingo;
 
-import com.cavetale.core.font.DefaultFont;
+import com.cavetale.core.font.GuiOverlay;
 import com.cavetale.mytems.Mytems;
 import java.io.File;
 import java.time.Duration;
@@ -158,27 +158,20 @@ public final class BingoPlugin extends JavaPlugin {
                 Component.space(),
                 Component.text("Collect 5 in a row!", NamedTextColor.WHITE),
             });
-        Gui gui = new Gui(this)
-            .size(size)
-            .title(DefaultFont.guiBlankOverlay(size, TextColor.color(0xFF00FF), guiTitle));
+        Gui gui = new Gui(this).size(size);
+        GuiOverlay.Builder builder = GuiOverlay.builder(size).title(guiTitle)
+            .layer(GuiOverlay.BLANK, TextColor.color(0x802080));
         for (int column = 0; column < 5; column += 1) {
             for (int row = 0; row < 5; row += 1) {
                 Material material = playerTag.materialList.get(column + row * 5);
                 int guiIndex = 2 + column + row * 9;
-                ItemStack icon;
+                gui.setItem(guiIndex, new ItemStack(material));
                 if (has.contains(material)) {
-                    icon = Mytems.CROSSED_CHECKBOX.createItemStack();
-                    icon.editMeta(meta -> {
-                            Component displayName = Component.text(new ItemStack(material).getI18NDisplayName(),
-                                                                   NamedTextColor.BLUE);
-                            meta.displayName(displayName);
-                        });
-                } else {
-                    icon = new ItemStack(material);
+                    builder.highlightSlot(guiIndex, NamedTextColor.GREEN);
                 }
-                gui.setItem(guiIndex, icon);
             }
         }
+        gui.title(builder.build());
         gui.open(player);
         boolean bingo = false;
         COLUMNS: for (int column = 0; column < 5; column += 1) {
