@@ -227,6 +227,10 @@ public final class BingoPlugin extends JavaPlugin {
             playerTag.setCompleted(true);
             playerTag.setCompletionCount(playerTag.getCompletionCount() + 1);
             savePlayerTag(player.getUniqueId(), playerTag);
+            if (player.getGameMode() != GameMode.CREATIVE) {
+                player.getInventory().clear();
+                player.getEnderChest().clear();
+            }
             gui.onClose(evt -> onPlayerHasBingo(player, playerTag));
         }
         if (player.getGameMode() == GameMode.CREATIVE) {
@@ -259,6 +263,8 @@ public final class BingoPlugin extends JavaPlugin {
                     if ((ticks % 8) != 0) return;
                     if (ticks > 140) {
                         cancel();
+                        player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_XYLOPHONE,
+                                         SoundCategory.MASTER, 1.0f, 2.0f);
                         openGui(player);
                         return;
                     }
@@ -332,11 +338,6 @@ public final class BingoPlugin extends JavaPlugin {
     }
 
     protected void onPlayerHasBingo(Player player, PlayerTag playerTag) {
-        // Clear
-        if (player.getGameMode() != GameMode.CREATIVE) {
-            player.getInventory().clear();
-            player.getEnderChest().clear();
-        }
         // Announce
         final int completionCount = playerTag.getCompletionCount();
         getLogger().info(player.getName() + " has Bingo #" + completionCount);
