@@ -1,4 +1,4 @@
-package com.cavetale.bingo.util;
+package com.cavetale.bingo;
 
 import java.util.HashMap;
 import java.util.Map;

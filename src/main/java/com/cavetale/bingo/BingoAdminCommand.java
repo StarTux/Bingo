@@ -47,8 +47,7 @@ public final class BingoAdminCommand implements TabExecutor {
 
     boolean reset(CommandSender sender, String[] args) {
         if (args.length != 0) return false;
-        plugin.tag = new Tag();
-        plugin.save();
+        plugin.resetPlayerTags();
         sender.sendMessage("Player progress was reset");
         return true;
     }

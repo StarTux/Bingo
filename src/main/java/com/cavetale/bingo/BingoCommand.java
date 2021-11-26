@@ -3,8 +3,6 @@ package com.cavetale.bingo;
 import java.util.Collections;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabExecutor;
@@ -25,12 +23,7 @@ public final class BingoCommand implements TabExecutor {
             return true;
         }
         if (args.length != 0) return false;
-        Player player = (Player) sender;
-        if (plugin.tag.completed.containsKey(player.getUniqueId())) {
-            player.sendMessage(Component.text("You already had bingo!", NamedTextColor.RED));
-            return true;
-        }
-        plugin.openGui(player);
+        plugin.openGui((Player) sender);
         return true;
     }
 

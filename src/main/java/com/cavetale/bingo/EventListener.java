@@ -34,13 +34,14 @@ public final class EventListener implements Listener {
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
     void onPlayerQuit(PlayerQuitEvent event) {
+        plugin.playerTagMap.remove(event.getPlayer().getUniqueId());
     }
 
     @EventHandler
     void onPlayerSidebar(PlayerSidebarEvent event) {
         Player player = event.getPlayer();
         if (!player.hasPermission("bingo.bingo")) return;
-        if (plugin.tag.completed.containsKey(player.getUniqueId())) return;
+        if (plugin.getPlayerTag(player).isCompleted()) return;
         List<Component> list = new ArrayList<>();
         list.add(Component.text("/bingo", NamedTextColor.BLUE));
         // Tag.Player playerTag = plugin.getPlayerTag(player);
