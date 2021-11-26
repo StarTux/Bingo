@@ -41,19 +41,12 @@ public final class EventListener implements Listener {
     void onPlayerSidebar(PlayerSidebarEvent event) {
         Player player = event.getPlayer();
         if (!player.hasPermission("bingo.bingo")) return;
-        if (plugin.getPlayerTag(player).isCompleted()) return;
+        PlayerTag playerTag = plugin.getPlayerTag(player);
         List<Component> list = new ArrayList<>();
-        list.add(Component.text("/bingo", NamedTextColor.BLUE));
-        // Tag.Player playerTag = plugin.getPlayerTag(player);
-        // for (int row = 0; row < 5; row += 1) {
-        //     TextComponent.Builder line = Component.text();
-        //     for (int col = 0; col < 5; col += 1) {
-        //         Material material = playerTag.materialList.get(row * 5 + col);
-        //         line.append(VanillaItems.componentOf(material));
-        //     }
-        //     list.add(line.build());
-        // }
-        event.add(plugin, Priority.HIGH, list);
+        list.add(Component.text("/", NamedTextColor.YELLOW)
+                 .append(plugin.bingoComponent));
+        list.add(plugin.getSubtitle(playerTag));
+        event.add(plugin, Priority.HIGHEST, list);
     }
 
     @EventHandler

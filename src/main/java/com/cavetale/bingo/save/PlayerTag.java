@@ -8,6 +8,7 @@ import org.bukkit.Material;
 @Data
 public final class PlayerTag {
     protected boolean completed;
+    protected int completionCount;
     protected List<Material> materialList = new ArrayList<>();
     protected List<Boolean> completeList = new ArrayList<>();
 }

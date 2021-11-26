@@ -34,7 +34,8 @@ public final class Gui implements InventoryHolder {
     @Getter @Setter private boolean editable = false;
     @Getter private int size = 3 * 9;
     @Getter private Component title = Component.empty();
-    boolean locked = false;
+    @Getter private boolean closed;
+    private boolean locked = false;
 
     @RequiredArgsConstructor @AllArgsConstructor
     private static final class Slot {
@@ -145,6 +146,7 @@ public final class Gui implements InventoryHolder {
     }
 
     void onInventoryClose(InventoryCloseEvent event) {
+        closed = true;
         if (onClose != null) {
             Bukkit.getScheduler().runTask(plugin, () -> onClose.accept(event));
         }

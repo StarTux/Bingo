@@ -4,6 +4,8 @@ import com.cavetale.bingo.util.Gui;
 import com.cavetale.core.font.GuiOverlay;
 import com.cavetale.core.util.Json;
 import com.cavetale.mytems.Mytems;
+import com.cavetale.mytems.MytemsTag;
+import com.cavetale.mytems.util.Items;
 import java.io.File;
 import java.time.Duration;
 import java.util.ArrayList;
@@ -14,7 +16,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Random;
-import java.util.Set;
 import java.util.UUID;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.JoinConfiguration;
@@ -25,9 +26,12 @@ import net.kyori.adventure.title.Title;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
+import org.bukkit.Sound;
+import org.bukkit.SoundCategory;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scheduler.BukkitRunnable;
 
 public final class BingoPlugin extends JavaPlugin {
     protected BingoCommand bingoCommand = new BingoCommand(this);
@@ -103,7 +107,8 @@ public final class BingoPlugin extends JavaPlugin {
                 Material.AZALEA,
                 Material.FLOWERING_AZALEA,
             }));
-    private Component bingoComponent;
+    private static final List<String> TITLES = List.of("Bingo");
+    protected Component bingoComponent;
 
     @Override
     public void onEnable() {
@@ -165,13 +170,15 @@ public final class BingoPlugin extends JavaPlugin {
         }
     }
 
+    public Component getSubtitle(PlayerTag playerTag) {
+        return playerTag.getCompletionCount() == 0
+            ? Component.text("Collect 5 in a row!", NamedTextColor.WHITE)
+            : Component.text("Run #" + ((playerTag.isCompleted() ? 0 : 1) + playerTag.getCompletionCount()), NamedTextColor.WHITE);
+    }
+
     public void openGui(Player player) {
         PlayerTag playerTag = getPlayerTag(player);
         if (playerTag == null) throw new IllegalStateException(player.getName() + " playerTag = null");
-        if (playerTag.getMaterialList().isEmpty()) {
-            rollPlayerTag(playerTag);
-            savePlayerTag(player.getUniqueId(), playerTag);
-        }
         player.sendMessage(Component.join(JoinConfiguration.noSeparators(),
                                           bingoComponent,
                                           Component.space(),
@@ -180,7 +187,7 @@ public final class BingoPlugin extends JavaPlugin {
         Component guiTitle = Component.join(JoinConfiguration.noSeparators(), new Component[] {
                 bingoComponent,
                 Component.space(),
-                Component.text("Collect 5 in a row!", NamedTextColor.WHITE),
+                getSubtitle(playerTag),
             });
         Gui gui = new Gui(this).size(size);
         GuiOverlay.Builder builder = GuiOverlay.builder(size).title(guiTitle)
@@ -190,19 +197,37 @@ public final class BingoPlugin extends JavaPlugin {
         }
         for (int column = 0; column < 5; column += 1) {
             for (int row = 0; row < 5; row += 1) {
-                Material material = playerTag.getMaterialList().get(column + row * 5);
                 int guiIndex = 2 + column + row * 9;
-                gui.setItem(guiIndex, new ItemStack(material));
-                if (playerTag.getCompleteList().get(column + row * 5)) {
-                    builder.highlightSlot(guiIndex, NamedTextColor.GREEN);
+                if (playerTag.getMaterialList().isEmpty()) {
+                    gui.setItem(guiIndex, Items.text(Mytems.QUESTION_MARK.createItemStack(),
+                                                     List.of(Component.text("?", NamedTextColor.GREEN))));
+                } else {
+                    Material material = playerTag.getMaterialList().get(column + row * 5);
+                    gui.setItem(guiIndex, new ItemStack(material));
+                    if (playerTag.getCompleteList().get(column + row * 5)) {
+                        builder.highlightSlot(guiIndex, NamedTextColor.GREEN);
+                    }
                 }
             }
         }
         gui.title(builder.build());
+        if (playerTag.isCompleted() || playerTag.getMaterialList().isEmpty()) {
+            gui.setItem(18, Items.text(Mytems.DICE.createItemStack(),
+                                       List.of(Component.text("Create Bingo Sheet", NamedTextColor.GREEN))),
+                        click -> {
+                            if (!click.isLeftClick()) return;
+                            playerTag.setCompleted(false);
+                            playerTag.getCompleteList().clear();
+                            rollPlayerTag(playerTag);
+                            savePlayerTag(player.getUniqueId(), playerTag);
+                            startRollAnimation(player, playerTag);
+                        });
+        }
         if (!playerTag.isCompleted() && isBingo(playerTag)) {
             playerTag.setCompleted(true);
+            playerTag.setCompletionCount(playerTag.getCompletionCount() + 1);
             savePlayerTag(player.getUniqueId(), playerTag);
-            gui.onClose(evt -> onPlayerHasBingo(player));
+            gui.onClose(evt -> onPlayerHasBingo(player, playerTag));
         }
         if (player.getGameMode() == GameMode.CREATIVE) {
             gui.setEditable(true);
@@ -210,21 +235,67 @@ public final class BingoPlugin extends JavaPlugin {
         gui.open(player);
     }
 
-    protected void buildCompleteList(Player player, PlayerTag playerTag) {
-        Set<Material> has = EnumSet.noneOf(Material.class);
-        for (Material mat : playerTag.getMaterialList()) {
-            if (player.getInventory().contains(mat) || player.getEnderChest().contains(mat)) {
-                has.add(mat);
+    protected void startRollAnimation(Player player, PlayerTag playerTag) {
+        Component guiTitle = Component.join(JoinConfiguration.noSeparators(), new Component[] {
+                bingoComponent,
+                Component.space(),
+                getSubtitle(playerTag),
+            });
+        final int size = 5 * 9;
+        final Gui gui = new Gui(this).size(size);
+        GuiOverlay.Builder builder = GuiOverlay.builder(size).title(guiTitle)
+            .layer(GuiOverlay.BLANK, TextColor.color(0x802080));
+        gui.title(builder.build());
+        gui.open(player);
+        new BukkitRunnable() {
+            int ticks = 0;
+            @Override public void run() {
+                ticks += 1;
+                if (gui.isClosed()) {
+                    cancel();
+                    return;
+                }
+                if (ticks > 120) {
+                    if ((ticks % 8) != 0) return;
+                    if (ticks > 140) {
+                        cancel();
+                        openGui(player);
+                        return;
+                    }
+                } else if (ticks > 100) {
+                    if ((ticks % 4) != 0) return;
+                } else if (ticks > 80) {
+                    if ((ticks % 3) != 0) return;
+                } else if (ticks > 60) {
+                    if ((ticks % 2) == 0) return;
+                } else if (ticks > 40) {
+                    if ((ticks % 3) == 0) return;
+                } else if (ticks > 20) {
+                    if ((ticks % 4) == 0) return;
+                }
+                for (int column = 0; column < 5; column += 1) {
+                    for (int row = 0; row < 5; row += 1) {
+                        Material material = materialList.get(random.nextInt(materialList.size()));
+                        gui.setItem(2 + column + row * 9, new ItemStack(material));
+                    }
+                }
+                player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK,
+                                 SoundCategory.MASTER, 0.25f, 2.0f);
             }
-        }
+        }.runTaskTimer(this, 1L, 1L);
+    }
+
+    protected void buildCompleteList(Player player, PlayerTag playerTag) {
         playerTag.getCompleteList().clear();
-        for (int i = 0; i < 25; i += 1) {
-            playerTag.getCompleteList().add(has.contains(playerTag.getMaterialList().get(i)));
+        for (Material mat : playerTag.getMaterialList()) {
+            playerTag.getCompleteList().add(player.getInventory().contains(mat)
+                                            || player.getEnderChest().contains(mat));
         }
     }
 
     protected boolean isBingo(PlayerTag playerTag) {
         List<Boolean> completeList = playerTag.getCompleteList();
+        if (completeList.isEmpty()) return false;
         COLUMNS: for (int column = 0; column < 5; column += 1) {
             for (int row = 0; row < 5; row += 1) {
                 if (!completeList.get(column + row * 5)) {
@@ -260,17 +331,23 @@ public final class BingoPlugin extends JavaPlugin {
         return false;
     }
 
-    protected void onPlayerHasBingo(Player player) {
+    protected void onPlayerHasBingo(Player player, PlayerTag playerTag) {
         // Clear
-        player.getInventory().clear();
-        player.getEnderChest().clear();
+        if (player.getGameMode() != GameMode.CREATIVE) {
+            player.getInventory().clear();
+            player.getEnderChest().clear();
+        }
         // Announce
-        getLogger().info(player.getName() + " has a Bingo!");
+        final int completionCount = playerTag.getCompletionCount();
+        getLogger().info(player.getName() + " has Bingo #" + completionCount);
         for (Player target : Bukkit.getOnlinePlayers()) {
             Component message = Component.join(JoinConfiguration.noSeparators(), new Component[] {
                     player.displayName(),
-                    Component.text(" has a ", NamedTextColor.GREEN),
+                    Component.text(" has ", NamedTextColor.GREEN),
                     bingoComponent,
+                    (completionCount == 0
+                     ? Component.empty()
+                     : Component.text(" #" + completionCount, NamedTextColor.GRAY)),
                 });
             target.sendActionBar(message);
             target.sendMessage(Component.join(JoinConfiguration.separator(Component.newline()), new Component[] {
@@ -284,23 +361,17 @@ public final class BingoPlugin extends JavaPlugin {
                                      Title.Times.of(Duration.ofSeconds(1),
                                                     Duration.ofSeconds(1),
                                                     Duration.ofSeconds(1))));
+        player.playSound(player.getLocation(), Sound.UI_TOAST_CHALLENGE_COMPLETE, SoundCategory.MASTER, 1.0f, 0.85f);
         // MemberList and Title
         Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "ml add " + player.getName());
-        Bukkit.getScheduler().runTaskLater(this, () -> {
-                Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "titles unlockset " + player.getName() + " Bingo");
-            }, 60L);
+        List<String> titles = List.copyOf(TITLES.subList(0, Math.min(TITLES.size(), completionCount)));
+        String cmd = "titles unlockset " + player.getName() + " " + String.join(" ", titles);
+        getLogger().info("Dispatching command: " + cmd);
+        Bukkit.dispatchCommand(Bukkit.getConsoleSender(), cmd);
         // Random reward
-        List<Mytems> list = List.of(Mytems.PAN_FLUTE,
-                                    Mytems.TRIANGLE,
-                                    Mytems.WOODEN_LUTE,
-                                    Mytems.WOODEN_OCARINA,
-                                    Mytems.BANJO,
-                                    Mytems.GUITAR,
-                                    Mytems.MUSICAL_BELL,
-                                    Mytems.COW_BELL,
-                                    Mytems.POCKET_PIANO,
-                                    Mytems.ELECTRIC_PIANO,
-                                    Mytems.IRON_XYLOPHONE);
-        player.getInventory().addItem(list.get(random.nextInt(list.size())).createItemStack(player));
+        List<Mytems> list = MytemsTag.MUSIC.toList();
+        if (!list.isEmpty()) {
+            player.getInventory().addItem(list.get(random.nextInt(list.size())).createItemStack(player));
+        }
     }
 }
