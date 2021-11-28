@@ -6,6 +6,7 @@ import com.cavetale.core.util.Json;
 import com.cavetale.mytems.Mytems;
 import com.cavetale.mytems.MytemsTag;
 import com.cavetale.mytems.util.Items;
+import com.winthier.title.TitlePlugin;
 import java.io.File;
 import java.time.Duration;
 import java.util.ArrayList;
@@ -107,7 +108,9 @@ public final class BingoPlugin extends JavaPlugin {
                 Material.AZALEA,
                 Material.FLOWERING_AZALEA,
             }));
-    private static final List<String> TITLES = List.of("Bingo");
+    private static final List<String> TITLES = List.of("Bingo",
+                                                       "Battleship",
+                                                       "AxolotlBucket");
     private static final List<ItemStack> STARTER_KIT = List.of(new ItemStack[] {
             new ItemStack(Material.WOODEN_PICKAXE),
             new ItemStack(Material.WOODEN_SHOVEL),
@@ -133,6 +136,11 @@ public final class BingoPlugin extends JavaPlugin {
         Gui.enable(this);
         playersFolder = new File(getDataFolder(), "players");
         playersFolder.mkdirs();
+        for (String titleName : TITLES) {
+            if (TitlePlugin.getInstance().getTitle(titleName) == null) {
+                getLogger().warning("Title not found: " + titleName);
+            }
+        }
     }
 
     @Override
