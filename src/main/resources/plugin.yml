@@ -23,7 +23,7 @@ commands:
   bingoadmin:
     aliases: [bingoadm]
     description: Bingo Admin Command
-    permission: bingo.bingo
+    permission: bingo.admin
     usage: |-
       /bingoadmin
 
