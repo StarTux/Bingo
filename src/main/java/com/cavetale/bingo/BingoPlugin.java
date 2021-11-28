@@ -108,6 +108,12 @@ public final class BingoPlugin extends JavaPlugin {
                 Material.FLOWERING_AZALEA,
             }));
     private static final List<String> TITLES = List.of("Bingo");
+    private static final List<ItemStack> STARTER_KIT = List.of(new ItemStack[] {
+            new ItemStack(Material.WOODEN_PICKAXE),
+            new ItemStack(Material.WOODEN_SHOVEL),
+            new ItemStack(Material.WOODEN_SWORD),
+            new ItemStack(Material.BREAD, 16),
+        });
     protected Component bingoComponent;
 
     @Override
@@ -221,6 +227,9 @@ public final class BingoPlugin extends JavaPlugin {
                             rollPlayerTag(playerTag);
                             savePlayerTag(player.getUniqueId(), playerTag);
                             startRollAnimation(player, playerTag);
+                            for (ItemStack item : STARTER_KIT) {
+                                player.getInventory().addItem(item.clone());
+                            }
                         });
         }
         if (!playerTag.isCompleted() && isBingo(playerTag)) {
