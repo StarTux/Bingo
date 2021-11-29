@@ -389,7 +389,7 @@ public final class BingoPlugin extends JavaPlugin {
         // Random reward
         List<Mytems> list = MytemsTag.MUSIC.toList();
         if (!list.isEmpty()) {
-            player.getInventory().addItem(list.get(random.nextInt(list.size())).createItemStack(player));
+            player.getInventory().addItem(list.get(random.nextInt(list.size())).createItemStack());
         }
     }
 }
