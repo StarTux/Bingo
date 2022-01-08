@@ -17,7 +17,6 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
-import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
 @RequiredArgsConstructor
@@ -73,24 +72,11 @@ public final class EventListener implements Listener {
 
     @EventHandler
     private void onDungeonLoot(DungeonLootEvent event) {
-        if (event.getDungeon().isRaided()) return;
         Player player = event.getPlayer();
         List<Material> materialList = plugin.getPlayerTag(player).materialList;
         Material material = materialList.get(plugin.random.nextInt(materialList.size()));
-        Inventory inv = event.getInventory();
-        int index = -1;
-        int chance = 1;
-        for (int i = 0; i < inv.getSize(); i += 1) {
-            ItemStack item = inv.getItem(i);
-            if (item == null || item.getType() == Material.AIR) {
-                if (plugin.random.nextInt(chance++) == 0) {
-                    index = i;
-                }
-            }
-        }
-        if (index < 0) return;
         ItemStack item = new ItemStack(material);
-        inv.setItem(index, item);
+        if (!event.addItem(item)) return;
         plugin.getLogger().info("Spawned " + item.getI18NDisplayName() + " for " + player.getName()
                                 + " in dungeon at " + event.getDungeon().getLo());
     }
