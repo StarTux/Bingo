@@ -4,6 +4,7 @@ import com.cavetale.bingo.util.Gui;
 import com.cavetale.core.font.GuiOverlay;
 import com.cavetale.core.util.Json;
 import com.cavetale.mytems.Mytems;
+import com.cavetale.mytems.MytemsCategory;
 import com.cavetale.mytems.MytemsTag;
 import com.cavetale.mytems.util.Items;
 import com.winthier.title.TitlePlugin;
@@ -402,7 +403,7 @@ public final class BingoPlugin extends JavaPlugin {
         getLogger().info("Dispatching command: " + cmd);
         Bukkit.dispatchCommand(Bukkit.getConsoleSender(), cmd);
         // Random reward
-        List<Mytems> list = MytemsTag.MUSIC.toList();
+        List<Mytems> list = MytemsTag.of(MytemsCategory.MUSIC).getMytems();
         if (!list.isEmpty()) {
             player.getInventory().addItem(list.get(random.nextInt(list.size())).createItemStack());
         }
