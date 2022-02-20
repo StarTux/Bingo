@@ -126,7 +126,8 @@ public final class BingoPlugin extends JavaPlugin {
             }));
     private static final List<String> TITLES = List.of("Bingo",
                                                        "Battleship",
-                                                       "AxolotlBucket");
+                                                       "AxolotlBucket",
+                                                       "TropicalFishBucket");
     private static final List<ItemStack> STARTER_KIT = List.of(new ItemStack[] {
             new ItemStack(Material.WOODEN_PICKAXE),
             new ItemStack(Material.WOODEN_SHOVEL),
