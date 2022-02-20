@@ -261,10 +261,6 @@ public final class BingoPlugin extends JavaPlugin {
             playerTag.setCompleted(true);
             playerTag.setCompletionCount(playerTag.getCompletionCount() + 1);
             savePlayerTag(player.getUniqueId(), playerTag);
-            if (player.getGameMode() != GameMode.CREATIVE) {
-                player.getInventory().clear();
-                player.getEnderChest().clear();
-            }
             gui.onClose(evt -> onPlayerHasBingo(player, playerTag));
         }
         if (player.getGameMode() == GameMode.CREATIVE) {
