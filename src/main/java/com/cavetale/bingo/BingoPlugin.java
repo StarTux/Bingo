@@ -11,7 +11,6 @@ import com.winthier.title.TitlePlugin;
 import java.io.File;
 import java.time.Duration;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
@@ -19,6 +18,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Random;
 import java.util.UUID;
+import java.util.concurrent.ThreadLocalRandom;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.JoinConfiguration;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -39,7 +39,7 @@ public final class BingoPlugin extends JavaPlugin {
     protected BingoCommand bingoCommand = new BingoCommand(this);
     protected BingoAdminCommand bingoAdminCommand = new BingoAdminCommand(this);
     protected EventListener eventListener = new EventListener(this);
-    protected Random random = new Random();
+    protected Random random = ThreadLocalRandom.current();
     protected final Map<UUID, PlayerTag> playerTagMap = new HashMap<>();
     protected File playersFolder;
     private final List<Material> materialList = new ArrayList<>(EnumSet.of(Material.CAKE, new Material[] {
@@ -193,14 +193,6 @@ public final class BingoPlugin extends JavaPlugin {
         }
     }
 
-    private void rollPlayerTag(PlayerTag playerTag) {
-        Collections.shuffle(materialList, random);
-        playerTag.getMaterialList().clear();
-        for (int i = 0; i < 25; i += 1) {
-            playerTag.getMaterialList().add(materialList.get(i));
-        }
-    }
-
     public Component getSubtitle(PlayerTag playerTag) {
         return playerTag.getCompletionCount() == 0
             ? Component.text("Collect 5 in a row!", NamedTextColor.WHITE)
@@ -224,7 +216,7 @@ public final class BingoPlugin extends JavaPlugin {
         GuiOverlay.Builder builder = GuiOverlay.builder(size).title(guiTitle)
             .layer(GuiOverlay.BLANK, TextColor.color(0x802080));
         if (!playerTag.isCompleted()) {
-            buildCompleteList(player, playerTag);
+            playerTag.buildCompleteList(player);
         }
         for (int column = 0; column < 5; column += 1) {
             for (int row = 0; row < 5; row += 1) {
@@ -249,15 +241,31 @@ public final class BingoPlugin extends JavaPlugin {
                             if (!click.isLeftClick()) return;
                             playerTag.setCompleted(false);
                             playerTag.getCompleteList().clear();
-                            rollPlayerTag(playerTag);
+                            playerTag.roll(materialList, random);
                             savePlayerTag(player.getUniqueId(), playerTag);
                             startRollAnimation(player, playerTag);
-                            for (ItemStack item : STARTER_KIT) {
-                                player.getInventory().addItem(item.clone());
+                            if (playerTag.getCompletionCount() == 0) {
+                                for (ItemStack item : STARTER_KIT) {
+                                    player.getInventory().addItem(item.clone());
+                                }
                             }
                         });
         }
-        if (!playerTag.isCompleted() && isBingo(playerTag)) {
+        List<Material> bingo = playerTag.findBingo();
+        if (!playerTag.isCompleted() && bingo != null && !bingo.isEmpty()) {
+            for (Material material : bingo) {
+                int first;
+                first = player.getInventory().first(material);
+                if (first >= 0) {
+                    player.getInventory().getItem(first).subtract(1);
+                    continue;
+                }
+                first = player.getEnderChest().first(material);
+                if (first >= 0) {
+                    player.getEnderChest().getItem(first).subtract(1);
+                    continue;
+                }
+            }
             playerTag.setCompleted(true);
             playerTag.setCompletionCount(playerTag.getCompletionCount() + 1);
             savePlayerTag(player.getUniqueId(), playerTag);
@@ -319,52 +327,6 @@ public final class BingoPlugin extends JavaPlugin {
                                  SoundCategory.MASTER, 0.25f, 2.0f);
             }
         }.runTaskTimer(this, 1L, 1L);
-    }
-
-    protected void buildCompleteList(Player player, PlayerTag playerTag) {
-        playerTag.getCompleteList().clear();
-        for (Material mat : playerTag.getMaterialList()) {
-            playerTag.getCompleteList().add(player.getInventory().contains(mat)
-                                            || player.getEnderChest().contains(mat));
-        }
-    }
-
-    protected boolean isBingo(PlayerTag playerTag) {
-        List<Boolean> completeList = playerTag.getCompleteList();
-        if (completeList.isEmpty()) return false;
-        COLUMNS: for (int column = 0; column < 5; column += 1) {
-            for (int row = 0; row < 5; row += 1) {
-                if (!completeList.get(column + row * 5)) {
-                    continue COLUMNS;
-                }
-            }
-            return true;
-        }
-        ROWS: for (int row = 0; row < 5; row += 1) {
-            for (int column = 0; column < 5; column += 1) {
-                if (!completeList.get(column + row * 5)) {
-                    continue ROWS;
-                }
-            }
-            return true;
-        }
-        DIAG: do {
-            for (int i = 0; i < 5; i += 1) {
-                if (!completeList.get(i + i * 5)) {
-                    break DIAG;
-                }
-            }
-            return true;
-        } while (false);
-        DIAG: do {
-            for (int i = 0; i < 5; i += 1) {
-                if (!completeList.get(i + (4 - i) * 5)) {
-                    break DIAG;
-                }
-            }
-            return true;
-        } while (false);
-        return false;
     }
 
     protected void onPlayerHasBingo(Player player, PlayerTag playerTag) {
