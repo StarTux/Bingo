@@ -1,28 +1,33 @@
 package com.cavetale.bingo;
 
+import com.cavetale.bingo.save.PlayerTag;
+import com.cavetale.bingo.save.SaveTag;
 import com.cavetale.bingo.util.Gui;
 import com.cavetale.core.font.GuiOverlay;
 import com.cavetale.core.util.Json;
+import com.cavetale.fam.trophy.SQLTrophy;
+import com.cavetale.fam.trophy.Trophies;
 import com.cavetale.mytems.Mytems;
 import com.cavetale.mytems.MytemsCategory;
 import com.cavetale.mytems.MytemsTag;
+import com.cavetale.mytems.item.trophy.TrophyCategory;
 import com.cavetale.mytems.util.Items;
+import com.destroystokyo.paper.MaterialTags;
 import com.winthier.title.TitlePlugin;
 import java.io.File;
 import java.time.Duration;
 import java.util.ArrayList;
-import java.util.EnumSet;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Random;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.JoinConfiguration;
-import net.kyori.adventure.text.format.NamedTextColor;
-import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.title.Title;
 import org.bukkit.Bukkit;
@@ -30,100 +35,31 @@ import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.SoundCategory;
+import org.bukkit.Tag;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
+import static net.kyori.adventure.text.Component.empty;
+import static net.kyori.adventure.text.Component.join;
+import static net.kyori.adventure.text.Component.newline;
+import static net.kyori.adventure.text.Component.space;
+import static net.kyori.adventure.text.Component.text;
+import static net.kyori.adventure.text.JoinConfiguration.noSeparators;
+import static net.kyori.adventure.text.JoinConfiguration.separator;
+import static net.kyori.adventure.text.format.NamedTextColor.*;
+import static net.kyori.adventure.text.format.TextColor.color;
 
 public final class BingoPlugin extends JavaPlugin {
     protected BingoCommand bingoCommand = new BingoCommand(this);
     protected BingoAdminCommand bingoAdminCommand = new BingoAdminCommand(this);
     protected EventListener eventListener = new EventListener(this);
     protected Random random = ThreadLocalRandom.current();
+    protected SaveTag saveTag;
     protected final Map<UUID, PlayerTag> playerTagMap = new HashMap<>();
+    protected final List<Highscore> highscore = new ArrayList<>();
     protected File playersFolder;
-    private final List<Material> materialList = new ArrayList<>(EnumSet.of(Material.CAKE, new Material[] {
-                // Original
-                Material.MAGMA_CREAM,
-                Material.SPIDER_EYE,
-                Material.ENDER_PEARL,
-                Material.POWERED_RAIL,
-                Material.REPEATER,
-                Material.COMPASS,
-                Material.BLUE_CARPET,
-                Material.ENCHANTING_TABLE,
-                Material.GOLDEN_APPLE,
-                // 2nd run
-                Material.COMPASS,
-                Material.CROSSBOW,
-                Material.BLAZE_ROD,
-                Material.SWEET_BERRIES,
-                Material.QUARTZ,
-                Material.FLINT_AND_STEEL,
-                Material.MAGMA_CREAM,
-                Material.POWERED_RAIL,
-                Material.TNT,
-                // Random
-                Material.SEA_LANTERN,
-                Material.LANTERN,
-                Material.GLOWSTONE,
-                Material.ANCIENT_DEBRIS,
-                Material.IRON_BLOCK,
-                Material.GOLD_BLOCK,
-                Material.REDSTONE_BLOCK,
-                // 1.17
-                Material.AMETHYST_SHARD,
-                Material.AXOLOTL_BUCKET,
-                Material.COPPER_BLOCK,
-                Material.GLOW_BERRIES,
-                Material.GLOW_INK_SAC,
-                Material.SPYGLASS,
-                Material.CALCITE,
-                Material.CANDLE,
-                Material.POLISHED_DEEPSLATE,
-                Material.DRIPSTONE_BLOCK,
-                Material.GLOW_ITEM_FRAME,
-                Material.LIGHTNING_ROD,
-                Material.POINTED_DRIPSTONE,
-                Material.TINTED_GLASS,
-                Material.TUFF,
-                // August 2021
-                Material.OBSERVER,
-                Material.DAYLIGHT_DETECTOR,
-                Material.LEAD,
-                Material.JACK_O_LANTERN,
-                Material.FIRE_CHARGE,
-                Material.CAKE,
-                // November 2021
-                Material.HONEYCOMB,
-                Material.VINE,
-                Material.SMALL_DRIPLEAF,
-                Material.BIG_DRIPLEAF,
-                Material.GLOW_LICHEN,
-                Material.ENDER_CHEST,
-                Material.FERMENTED_SPIDER_EYE,
-                Material.MOSS_BLOCK,
-                Material.NETHERITE_PICKAXE,
-                Material.SCUTE,
-                Material.SHROOMLIGHT,
-                Material.AZALEA,
-                Material.FLOWERING_AZALEA,
-                // January 2022
-                Material.COOKIE,
-                Material.PUMPKIN_PIE,
-                Material.SHIELD,
-                Material.POWDER_SNOW_BUCKET,
-                Material.STONECUTTER,
-                Material.CARTOGRAPHY_TABLE,
-                Material.BREWING_STAND,
-                Material.COMPOSTER,
-                Material.BARREL,
-                Material.LECTERN,
-                Material.CAULDRON,
-                Material.LOOM,
-                Material.GRINDSTONE,
-                Material.SMITHING_TABLE,
-            }));
+    private final List<Material> materialList = new ArrayList<>();
     private static final List<String> TITLES = List.of("Bingo",
                                                        "Battleship",
                                                        "AxolotlBucket",
@@ -134,22 +70,122 @@ public final class BingoPlugin extends JavaPlugin {
             new ItemStack(Material.WOODEN_SWORD),
             new ItemStack(Material.BREAD, 16),
         });
-    protected Component bingoComponent;
+    protected static final Component BINGO = join(noSeparators(),
+                                                  text("B", color(0xff4500)),
+                                                  text("i", color(0xffa500)),
+                                                  text("n", color(0x00ff00)),
+                                                  text("g", color(0x8080ff)),
+                                                  text("o", color(0xcd5c5c)),
+                                                  text("!", color(0xffd700)))
+        .decorate(TextDecoration.BOLD);
+
+    private void buildMaterialList() {
+        materialList.clear();
+        Set<Material> set = new HashSet<>(Set.of(new Material[] {
+                    // Original
+                    Material.MAGMA_CREAM,
+                    Material.SPIDER_EYE,
+                    Material.ENDER_PEARL,
+                    Material.POWERED_RAIL,
+                    Material.REPEATER,
+                    Material.COMPASS,
+                    Material.BLUE_CARPET,
+                    Material.ENCHANTING_TABLE,
+                    Material.GOLDEN_APPLE,
+                    // 2nd run
+                    Material.CROSSBOW,
+                    Material.BLAZE_ROD,
+                    Material.SWEET_BERRIES,
+                    Material.QUARTZ,
+                    Material.FLINT_AND_STEEL,
+                    Material.TNT,
+                    // Random
+                    Material.SEA_LANTERN,
+                    Material.LANTERN,
+                    Material.GLOWSTONE,
+                    Material.ANCIENT_DEBRIS,
+                    Material.IRON_BLOCK,
+                    Material.GOLD_BLOCK,
+                    Material.REDSTONE_BLOCK,
+                    // 1.17
+                    Material.AMETHYST_SHARD,
+                    Material.AXOLOTL_BUCKET,
+                    Material.COPPER_BLOCK,
+                    Material.GLOW_BERRIES,
+                    Material.GLOW_INK_SAC,
+                    Material.SPYGLASS,
+                    Material.CALCITE,
+                    Material.CANDLE,
+                    Material.POLISHED_DEEPSLATE,
+                    Material.DRIPSTONE_BLOCK,
+                    Material.GLOW_ITEM_FRAME,
+                    Material.LIGHTNING_ROD,
+                    Material.POINTED_DRIPSTONE,
+                    Material.TINTED_GLASS,
+                    Material.TUFF,
+                    // August 2021
+                    Material.OBSERVER,
+                    Material.DAYLIGHT_DETECTOR,
+                    Material.LEAD,
+                    Material.JACK_O_LANTERN,
+                    Material.FIRE_CHARGE,
+                    Material.CAKE,
+                    // November 2021
+                    Material.HONEYCOMB,
+                    Material.VINE,
+                    Material.SMALL_DRIPLEAF,
+                    Material.BIG_DRIPLEAF,
+                    Material.GLOW_LICHEN,
+                    Material.ENDER_CHEST,
+                    Material.FERMENTED_SPIDER_EYE,
+                    Material.MOSS_BLOCK,
+                    Material.NETHERITE_PICKAXE,
+                    Material.SCUTE,
+                    Material.SHROOMLIGHT,
+                    Material.AZALEA,
+                    Material.FLOWERING_AZALEA,
+                    // January 2022
+                    Material.COOKIE,
+                    Material.PUMPKIN_PIE,
+                    Material.SHIELD,
+                    Material.POWDER_SNOW_BUCKET,
+                    Material.STONECUTTER,
+                    Material.CARTOGRAPHY_TABLE,
+                    Material.BREWING_STAND,
+                    Material.COMPOSTER,
+                    Material.BARREL,
+                    Material.LECTERN,
+                    Material.CAULDRON,
+                    Material.LOOM,
+                    Material.GRINDSTONE,
+                    Material.SMITHING_TABLE,
+                    // May 2022
+                    Material.ANVIL,
+                    Material.FEATHER,
+                    Material.DRIED_KELP_BLOCK,
+                    Material.SEA_PICKLE,
+                    Material.LILY_PAD,
+                    Material.COBWEB,
+                    Material.RABBIT_STEW,
+                    Material.MUSHROOM_STEW,
+                    Material.SUSPICIOUS_STEW,
+                }));
+        set.addAll(Tag.FLOWERS.getValues());
+        set.addAll(Tag.SAPLINGS.getValues());
+        set.addAll(Tag.LEAVES.getValues());
+        set.addAll(MaterialTags.MUSHROOMS.getValues());
+        set.addAll(MaterialTags.MUSHROOM_BLOCKS.getValues());
+        set.removeIf(m -> !m.isItem());
+        materialList.addAll(set);
+    }
 
     @Override
     public void onEnable() {
+        buildMaterialList();
+        loadSaveTag();
         bingoCommand.enable();
         bingoAdminCommand.enable();
         eventListener.enable();
-        bingoComponent = Component.text()
-            .decorate(TextDecoration.BOLD)
-            .append(Component.text("B", TextColor.color(0xff4500)))
-            .append(Component.text("i", TextColor.color(0xffa500)))
-            .append(Component.text("n", TextColor.color(0x00ff00)))
-            .append(Component.text("g", TextColor.color(0x8080ff)))
-            .append(Component.text("o", TextColor.color(0xcd5c5c)))
-            .append(Component.text("!", TextColor.color(0xffd700)))
-            .build();
         Gui.enable(this);
         playersFolder = new File(getDataFolder(), "players");
         playersFolder.mkdirs();
@@ -158,12 +194,23 @@ public final class BingoPlugin extends JavaPlugin {
                 getLogger().warning("Title not found: " + titleName);
             }
         }
+        computeHighscore();
     }
 
     @Override
     public void onDisable() {
+        saveSaveTag();
         playerTagMap.clear();
         Gui.disable(this);
+    }
+
+    protected void loadSaveTag() {
+        saveTag = Json.load(new File(getDataFolder(), "save.json"), SaveTag.class, SaveTag::new);
+    }
+
+    protected void saveSaveTag() {
+        if (saveTag == null) return;
+        Json.save(new File(getDataFolder(), "save.json"), saveTag);
     }
 
     protected PlayerTag loadPlayerTag(UUID uuid) {
@@ -184,37 +231,45 @@ public final class BingoPlugin extends JavaPlugin {
         return playerTagMap.computeIfAbsent(player.getUniqueId(), this::loadPlayerTag);
     }
 
-    public void resetPlayerTags() {
+    public void resetProgress() {
         playerTagMap.clear();
         for (File file : playersFolder.listFiles()) {
             if (file.isFile()) {
                 file.delete();
             }
         }
+        saveTag.getScores().clear();
+        saveSaveTag();
     }
 
     public Component getSubtitle(PlayerTag playerTag) {
         return playerTag.getCompletionCount() == 0
-            ? Component.text("Collect 5 in a row!", NamedTextColor.WHITE)
-            : Component.text("Run #" + ((playerTag.isCompleted() ? 0 : 1) + playerTag.getCompletionCount()), NamedTextColor.WHITE);
+            ? text("Collect 5 in a row!", WHITE)
+            : text("Run #" + ((playerTag.isCompleted() ? 0 : 1) + playerTag.getCompletionCount()), WHITE);
     }
 
     public void openGui(Player player) {
         PlayerTag playerTag = getPlayerTag(player);
         if (playerTag == null) throw new IllegalStateException(player.getName() + " playerTag = null");
-        player.sendMessage(Component.join(JoinConfiguration.noSeparators(),
-                                          bingoComponent,
-                                          Component.space(),
-                                          Component.text("Collect 5 in a row, column, or diagonal!", NamedTextColor.WHITE)));
+        final UUID uuid = player.getUniqueId();
+        if (!playerTag.isMemberListed()) {
+            playerTag.setMemberListed(true);
+            savePlayerTag(uuid, playerTag);
+            Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "ml add " + player.getName());
+        }
+        player.sendMessage(join(noSeparators(),
+                                          BINGO,
+                                          space(),
+                                          text("Collect 5 in a row, column, or diagonal!", WHITE)));
         final int size = 5 * 9;
-        Component guiTitle = Component.join(JoinConfiguration.noSeparators(), new Component[] {
-                bingoComponent,
-                Component.space(),
+        Component guiTitle = join(noSeparators(), new Component[] {
+                BINGO,
+                space(),
                 getSubtitle(playerTag),
             });
         Gui gui = new Gui(this).size(size);
         GuiOverlay.Builder builder = GuiOverlay.builder(size).title(guiTitle)
-            .layer(GuiOverlay.BLANK, TextColor.color(0x802080));
+            .layer(GuiOverlay.BLANK, color(0x802080));
         if (!playerTag.isCompleted()) {
             playerTag.buildCompleteList(player);
         }
@@ -223,12 +278,12 @@ public final class BingoPlugin extends JavaPlugin {
                 int guiIndex = 2 + column + row * 9;
                 if (playerTag.getMaterialList().isEmpty()) {
                     gui.setItem(guiIndex, Items.text(Mytems.QUESTION_MARK.createItemStack(),
-                                                     List.of(Component.text("?", NamedTextColor.GREEN))));
+                                                     List.of(text("?", GREEN))));
                 } else {
                     Material material = playerTag.getMaterialList().get(column + row * 5);
                     gui.setItem(guiIndex, new ItemStack(material));
                     if (playerTag.getCompleteList().get(column + row * 5)) {
-                        builder.highlightSlot(guiIndex, NamedTextColor.GREEN);
+                        builder.highlightSlot(guiIndex, GREEN);
                     }
                 }
             }
@@ -236,13 +291,13 @@ public final class BingoPlugin extends JavaPlugin {
         gui.title(builder.build());
         if (playerTag.isCompleted() || playerTag.getMaterialList().isEmpty()) {
             gui.setItem(18, Items.text(Mytems.DICE.createItemStack(),
-                                       List.of(Component.text("Create Bingo Sheet", NamedTextColor.GREEN))),
+                                       List.of(text("Create Bingo Sheet", GREEN))),
                         click -> {
                             if (!click.isLeftClick()) return;
                             playerTag.setCompleted(false);
                             playerTag.getCompleteList().clear();
                             playerTag.roll(materialList, random);
-                            savePlayerTag(player.getUniqueId(), playerTag);
+                            savePlayerTag(uuid, playerTag);
                             startRollAnimation(player, playerTag);
                             if (playerTag.getCompletionCount() == 0) {
                                 for (ItemStack item : STARTER_KIT) {
@@ -268,7 +323,10 @@ public final class BingoPlugin extends JavaPlugin {
             }
             playerTag.setCompleted(true);
             playerTag.setCompletionCount(playerTag.getCompletionCount() + 1);
-            savePlayerTag(player.getUniqueId(), playerTag);
+            savePlayerTag(uuid, playerTag);
+            saveTag.getScores().put(uuid, playerTag.getCompletionCount());
+            computeHighscore();
+            saveSaveTag();
             gui.onClose(evt -> onPlayerHasBingo(player, playerTag));
         }
         if (player.getGameMode() == GameMode.CREATIVE) {
@@ -278,15 +336,15 @@ public final class BingoPlugin extends JavaPlugin {
     }
 
     protected void startRollAnimation(Player player, PlayerTag playerTag) {
-        Component guiTitle = Component.join(JoinConfiguration.noSeparators(), new Component[] {
-                bingoComponent,
-                Component.space(),
+        Component guiTitle = join(noSeparators(), new Component[] {
+                BINGO,
+                space(),
                 getSubtitle(playerTag),
             });
         final int size = 5 * 9;
         final Gui gui = new Gui(this).size(size);
         GuiOverlay.Builder builder = GuiOverlay.builder(size).title(guiTitle)
-            .layer(GuiOverlay.BLANK, TextColor.color(0x802080));
+            .layer(GuiOverlay.BLANK, color(0x802080));
         gui.title(builder.build());
         gui.open(player);
         new BukkitRunnable() {
@@ -334,29 +392,28 @@ public final class BingoPlugin extends JavaPlugin {
         final int completionCount = playerTag.getCompletionCount();
         getLogger().info(player.getName() + " has Bingo #" + completionCount);
         for (Player target : Bukkit.getOnlinePlayers()) {
-            Component message = Component.join(JoinConfiguration.noSeparators(), new Component[] {
+            Component message = join(noSeparators(), new Component[] {
                     player.displayName(),
-                    Component.text(" has ", NamedTextColor.GREEN),
-                    bingoComponent,
+                    text(" has ", GREEN),
+                    BINGO,
                     (completionCount == 0
-                     ? Component.empty()
-                     : Component.text(" #" + completionCount, NamedTextColor.GRAY)),
+                     ? empty()
+                     : text(" #" + completionCount, GRAY)),
                 });
             target.sendActionBar(message);
-            target.sendMessage(Component.join(JoinConfiguration.separator(Component.newline()), new Component[] {
-                        Component.empty(),
+            target.sendMessage(join(separator(newline()), new Component[] {
+                        empty(),
                         message,
-                        Component.empty(),
+                        empty(),
                     }));
         }
-        player.showTitle(Title.title(bingoComponent,
-                                     Component.text("Congratulations!", NamedTextColor.GREEN),
-                                     Title.Times.of(Duration.ofSeconds(1),
-                                                    Duration.ofSeconds(1),
-                                                    Duration.ofSeconds(1))));
+        player.showTitle(Title.title(BINGO,
+                                     text("Congratulations!", GREEN),
+                                     Title.Times.times(Duration.ofSeconds(1),
+                                                       Duration.ofSeconds(1),
+                                                       Duration.ofSeconds(1))));
         player.playSound(player.getLocation(), Sound.UI_TOAST_CHALLENGE_COMPLETE, SoundCategory.MASTER, 1.0f, 0.85f);
         // MemberList and Title
-        Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "ml add " + player.getName());
         List<String> titles = List.copyOf(TITLES.subList(0, Math.min(TITLES.size(), completionCount)));
         String cmd = "titles unlockset " + player.getName() + " " + String.join(" ", titles);
         getLogger().info("Dispatching command: " + cmd);
@@ -366,5 +423,39 @@ public final class BingoPlugin extends JavaPlugin {
         if (!list.isEmpty()) {
             player.getInventory().addItem(list.get(random.nextInt(list.size())).createItemStack());
         }
+    }
+
+    protected void computeHighscore() {
+        highscore.clear();
+        for (Map.Entry<UUID, Integer> entry : saveTag.getScores().entrySet()) {
+            highscore.add(new Highscore(entry.getKey(), entry.getValue()));
+        }
+        Collections.sort(highscore, (a, b) -> Integer.compare(b.score, a.score));
+        int lastScore = -1;
+        int placement = 0;
+        for (Highscore hi : highscore) {
+            if (lastScore != hi.score) {
+                lastScore = hi.score;
+                placement += 1;
+            }
+            hi.placement = placement;
+        }
+    }
+
+    protected int rewardHighscore() {
+        computeHighscore();
+        List<SQLTrophy> trophies = new ArrayList<>();
+        for (Highscore hi : highscore) {
+            if (hi.score <= 0) break;
+            trophies.add(new SQLTrophy(hi.uuid,
+                                       "bingo_event",
+                                       hi.placement,
+                                       TrophyCategory.MEDAL,
+                                       BINGO,
+                                       "You completed " + hi.score + " Bingo card" + (hi.score == 1 ? "" : "s")));
+        }
+        if (trophies.isEmpty()) return 0;
+        Trophies.insertTrophies(trophies);
+        return trophies.size();
     }
 }

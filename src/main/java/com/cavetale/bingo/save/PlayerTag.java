@@ -1,4 +1,4 @@
-package com.cavetale.bingo;
+package com.cavetale.bingo.save;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -11,6 +11,7 @@ import org.bukkit.entity.Player;
 @Data
 public final class PlayerTag {
     protected boolean completed;
+    protected boolean memberListed;
     protected int completionCount;
     protected List<Material> materialList = new ArrayList<>();
     protected List<Boolean> completeList = new ArrayList<>();
