@@ -1,12 +1,9 @@
 package com.cavetale.bingo;
 
 import com.cavetale.bingo.save.PlayerTag;
-import com.cavetale.core.font.Unicode;
+import com.cavetale.core.event.hud.PlayerHudEvent;
+import com.cavetale.core.event.hud.PlayerHudPriority;
 import com.cavetale.dungeons.DungeonLootEvent;
-import com.cavetale.mytems.Mytems;
-import com.cavetale.mytems.item.font.Glyph;
-import com.cavetale.sidebar.PlayerSidebarEvent;
-import com.cavetale.sidebar.Priority;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -22,7 +19,6 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.ItemStack;
 import static net.kyori.adventure.text.Component.join;
-import static net.kyori.adventure.text.Component.space;
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.JoinConfiguration.noSeparators;
 import static net.kyori.adventure.text.format.NamedTextColor.*;
@@ -45,24 +41,16 @@ public final class EventListener implements Listener {
     }
 
     @EventHandler
-    void onPlayerSidebar(PlayerSidebarEvent event) {
+    void onPlayerHud(PlayerHudEvent event) {
         Player player = event.getPlayer();
         if (!player.hasPermission("bingo.bingo")) return;
         PlayerTag playerTag = plugin.getPlayerTag(player);
         List<Component> lines = new ArrayList<>();
         lines.add(join(noSeparators(), text("/", YELLOW), plugin.BINGO));
         lines.add(plugin.getSubtitle(playerTag));
-        for (int i = 0; i < 10; i += 1) {
-            Highscore hi = i < plugin.highscore.size() ? plugin.highscore.get(i) : Highscore.ZERO;
-            lines.add(join(noSeparators(),
-                           (hi.placement > 0
-                            ? Glyph.toComponent("" + hi.placement)
-                            : Mytems.QUESTION_MARK.component),
-                           text(Unicode.subscript(hi.score), GOLD),
-                           space(),
-                           hi.name()));
-        }
-        event.add(plugin, Priority.HIGHEST, lines);
+        lines.addAll(plugin.highscoreLines);
+        if (lines.isEmpty()) return;
+        event.sidebar(PlayerHudPriority.HIGHEST, lines);
     }
 
     @EventHandler

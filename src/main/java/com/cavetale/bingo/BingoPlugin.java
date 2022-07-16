@@ -5,8 +5,7 @@ import com.cavetale.bingo.save.SaveTag;
 import com.cavetale.bingo.util.Gui;
 import com.cavetale.core.font.GuiOverlay;
 import com.cavetale.core.util.Json;
-import com.cavetale.fam.trophy.SQLTrophy;
-import com.cavetale.fam.trophy.Trophies;
+import com.cavetale.fam.trophy.Highscore;
 import com.cavetale.mytems.Mytems;
 import com.cavetale.mytems.MytemsCategory;
 import com.cavetale.mytems.MytemsTag;
@@ -17,7 +16,6 @@ import com.winthier.title.TitlePlugin;
 import java.io.File;
 import java.time.Duration;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -29,7 +27,6 @@ import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextDecoration;
-import net.kyori.adventure.title.Title;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
@@ -49,6 +46,8 @@ import static net.kyori.adventure.text.JoinConfiguration.noSeparators;
 import static net.kyori.adventure.text.JoinConfiguration.separator;
 import static net.kyori.adventure.text.format.NamedTextColor.*;
 import static net.kyori.adventure.text.format.TextColor.color;
+import static net.kyori.adventure.title.Title.Times.times;
+import static net.kyori.adventure.title.Title.title;
 
 public final class BingoPlugin extends JavaPlugin {
     protected BingoCommand bingoCommand = new BingoCommand(this);
@@ -57,7 +56,8 @@ public final class BingoPlugin extends JavaPlugin {
     protected Random random = ThreadLocalRandom.current();
     protected SaveTag saveTag;
     protected final Map<UUID, PlayerTag> playerTagMap = new HashMap<>();
-    protected final List<Highscore> highscore = new ArrayList<>();
+    protected List<Highscore> highscore = List.of();
+    protected List<Component> highscoreLines = List.of();
     protected File playersFolder;
     private final List<Material> materialList = new ArrayList<>();
     private static final List<String> TITLES = List.of("Bingo",
@@ -194,7 +194,6 @@ public final class BingoPlugin extends JavaPlugin {
                 getLogger().warning("Title not found: " + titleName);
             }
         }
-        computeHighscore();
     }
 
     @Override
@@ -206,6 +205,7 @@ public final class BingoPlugin extends JavaPlugin {
 
     protected void loadSaveTag() {
         saveTag = Json.load(new File(getDataFolder(), "save.json"), SaveTag.class, SaveTag::new);
+        computeHighscore();
     }
 
     protected void saveSaveTag() {
@@ -407,11 +407,11 @@ public final class BingoPlugin extends JavaPlugin {
                         empty(),
                     }));
         }
-        player.showTitle(Title.title(BINGO,
-                                     text("Congratulations!", GREEN),
-                                     Title.Times.times(Duration.ofSeconds(1),
-                                                       Duration.ofSeconds(1),
-                                                       Duration.ofSeconds(1))));
+        player.showTitle(title(BINGO,
+                               text("Congratulations!", GREEN),
+                               times(Duration.ofSeconds(1),
+                                     Duration.ofSeconds(1),
+                                     Duration.ofSeconds(1))));
         player.playSound(player.getLocation(), Sound.UI_TOAST_CHALLENGE_COMPLETE, SoundCategory.MASTER, 1.0f, 0.85f);
         // MemberList and Title
         List<String> titles = List.copyOf(TITLES.subList(0, Math.min(TITLES.size(), completionCount)));
@@ -426,36 +426,15 @@ public final class BingoPlugin extends JavaPlugin {
     }
 
     protected void computeHighscore() {
-        highscore.clear();
-        for (Map.Entry<UUID, Integer> entry : saveTag.getScores().entrySet()) {
-            highscore.add(new Highscore(entry.getKey(), entry.getValue()));
-        }
-        Collections.sort(highscore, (a, b) -> Integer.compare(b.score, a.score));
-        int lastScore = -1;
-        int placement = 0;
-        for (Highscore hi : highscore) {
-            if (lastScore != hi.score) {
-                lastScore = hi.score;
-                placement += 1;
-            }
-            hi.placement = placement;
-        }
+        highscore = Highscore.of(saveTag.getScores());
+        highscoreLines = Highscore.sidebar(highscore, TrophyCategory.MEDAL);
     }
 
     protected int rewardHighscore() {
-        computeHighscore();
-        List<SQLTrophy> trophies = new ArrayList<>();
-        for (Highscore hi : highscore) {
-            if (hi.score <= 0) break;
-            trophies.add(new SQLTrophy(hi.uuid,
-                                       "bingo_event",
-                                       hi.placement,
-                                       TrophyCategory.MEDAL,
-                                       BINGO,
-                                       "You completed " + hi.score + " Bingo card" + (hi.score == 1 ? "" : "s")));
-        }
-        if (trophies.isEmpty()) return 0;
-        Trophies.insertTrophies(trophies);
-        return trophies.size();
+        return Highscore.reward(saveTag.getScores(),
+                                "bingo_event",
+                                TrophyCategory.MEDAL,
+                                BINGO,
+                                hi -> "You completed " + hi.score + " Bingo card" + (hi.score == 1 ? "" : "s"));
     }
 }

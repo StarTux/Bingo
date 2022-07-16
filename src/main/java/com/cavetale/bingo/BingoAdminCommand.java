@@ -35,6 +35,7 @@ public final class BingoAdminCommand extends AbstractCommand<BingoPlugin> {
 
     private void reset(CommandSender sender) {
         plugin.resetProgress();
+        plugin.computeHighscore();
         sender.sendMessage(text("Player progress was reset", AQUA));
     }
 
