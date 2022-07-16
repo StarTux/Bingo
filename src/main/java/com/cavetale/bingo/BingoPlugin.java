@@ -240,6 +240,7 @@ public final class BingoPlugin extends JavaPlugin {
         }
         saveTag.getScores().clear();
         saveSaveTag();
+        computeHighscore();
     }
 
     public Component getSubtitle(PlayerTag playerTag) {
