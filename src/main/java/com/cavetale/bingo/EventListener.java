@@ -83,6 +83,6 @@ public final class EventListener implements Listener {
         ItemStack item = new ItemStack(material);
         if (!event.addItem(item)) return;
         plugin.getLogger().info("Spawned " + item.getI18NDisplayName() + " for " + player.getName()
-                                + " in dungeon at " + event.getDungeon().getLo());
+                                + " in dungeon at " + event.getBoundingBox());
     }
 }
