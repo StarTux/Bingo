@@ -3,6 +3,7 @@ package com.cavetale.bingo;
 import com.cavetale.bingo.save.PlayerTag;
 import com.cavetale.core.event.hud.PlayerHudEvent;
 import com.cavetale.core.event.hud.PlayerHudPriority;
+import com.cavetale.core.item.ItemKinds;
 import com.cavetale.dungeons.DungeonLootEvent;
 import java.util.ArrayList;
 import java.util.List;
@@ -48,7 +49,9 @@ public final class EventListener implements Listener {
         List<Component> lines = new ArrayList<>();
         lines.add(join(noSeparators(), text("/", YELLOW), plugin.BINGO));
         lines.add(plugin.getSubtitle(playerTag));
-        lines.addAll(plugin.highscoreLines);
+        if (plugin.saveTag.isEvent()) {
+            lines.addAll(plugin.highscoreLines);
+        }
         if (lines.isEmpty()) return;
         event.sidebar(PlayerHudPriority.HIGHEST, lines);
     }
@@ -82,7 +85,7 @@ public final class EventListener implements Listener {
         Material material = materialList.get(plugin.random.nextInt(materialList.size()));
         ItemStack item = new ItemStack(material);
         if (!event.addItem(item)) return;
-        plugin.getLogger().info("Spawned " + item.getI18NDisplayName() + " for " + player.getName()
+        plugin.getLogger().info("Spawned " + ItemKinds.name(item) + " for " + player.getName()
                                 + " in dungeon at " + event.getBoundingBox());
     }
 }

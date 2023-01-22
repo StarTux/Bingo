@@ -31,6 +31,14 @@ public final class BingoAdminCommand extends AbstractCommand<BingoPlugin> {
             .completers(CommandArgCompleter.PLAYER_CACHE,
                         CommandArgCompleter.INTEGER)
             .senderCaller(this::addScore);
+        rootNode.addChild("event").arguments("[true|false]")
+            .description("Toggle event mode")
+            .completers(CommandArgCompleter.BOOLEAN)
+            .senderCaller(this::event);
+        rootNode.addChild("pause").arguments("[true|false]")
+            .description("Toggle pause")
+            .completers(CommandArgCompleter.BOOLEAN)
+            .senderCaller(this::pause);
     }
 
     private void give(Player player) {
@@ -57,6 +65,36 @@ public final class BingoAdminCommand extends AbstractCommand<BingoPlugin> {
         plugin.saveTag.addScore(target.uuid, score);
         plugin.computeHighscore();
         sender.sendMessage(text("Score of " + target.name + " added: " + score, AQUA));
+        return true;
+    }
+
+    private boolean event(CommandSender sender, String[] args) {
+        if (args.length > 1) return false;
+        if (args.length >= 1) {
+            boolean value = CommandArgCompleter.requireBoolean(args[0]);
+            plugin.saveTag.setEvent(value);
+            plugin.saveSaveTag();
+        }
+        if (plugin.saveTag.isEvent()) {
+            sender.sendMessage(text("Event mode enabled", AQUA));
+        } else {
+            sender.sendMessage(text("Event mode disabled", RED));
+        }
+        return true;
+    }
+
+    private boolean pause(CommandSender sender, String[] args) {
+        if (args.length > 1) return false;
+        if (args.length >= 1) {
+            boolean value = CommandArgCompleter.requireBoolean(args[0]);
+            plugin.saveTag.setPause(value);
+            plugin.saveSaveTag();
+        }
+        if (plugin.saveTag.isPause()) {
+            sender.sendMessage(text("Pause mode enabled", AQUA));
+        } else {
+            sender.sendMessage(text("Pause mode disabled", RED));
+        }
         return true;
     }
 }
