@@ -293,11 +293,6 @@ public final class BingoPlugin extends JavaPlugin {
                                 return;
                             }
                             startRollAnimation(player, playerTag);
-                            if (playerTag.getCompletionCount() == 0) {
-                                for (ItemStack item : STARTER_KIT) {
-                                    player.getInventory().addItem(item.clone());
-                                }
-                            }
                         });
         }
         List<Material> bingo = playerTag.findBingo();
@@ -359,6 +354,11 @@ public final class BingoPlugin extends JavaPlugin {
                         player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_XYLOPHONE,
                                          SoundCategory.MASTER, 1.0f, 2.0f);
                         openGui(player);
+                        if (playerTag.getCompletionCount() == 0) {
+                            for (ItemStack item : STARTER_KIT) {
+                                player.getInventory().addItem(item.clone());
+                            }
+                        }
                         return;
                     }
                 } else if (ticks > 100) {
