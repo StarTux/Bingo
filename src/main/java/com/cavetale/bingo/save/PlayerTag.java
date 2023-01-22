@@ -7,6 +7,7 @@ import java.util.Random;
 import lombok.Data;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
+import static com.cavetale.bingo.BingoPlugin.ROWS;
 
 @Data
 public final class PlayerTag {
@@ -18,57 +19,54 @@ public final class PlayerTag {
 
     public List<Material> findBingo() {
         if (completeList.isEmpty()) return null;
+        List<Material> result = new ArrayList<>();
         COLUMNS:
-        for (int column = 0; column < 5; column += 1) {
-            for (int row = 0; row < 5; row += 1) {
-                if (!completeList.get(column + row * 5)) {
+        for (int column = 0; column < ROWS; column += 1) {
+            for (int row = 0; row < ROWS; row += 1) {
+                if (!completeList.get(column + row * ROWS)) {
                     continue COLUMNS;
                 }
             }
-            return List.of(materialList.get(column + 0 * 5),
-                           materialList.get(column + 1 * 5),
-                           materialList.get(column + 2 * 5),
-                           materialList.get(column + 3 * 5),
-                           materialList.get(column + 4 * 5));
+            for (int i = 0; i < ROWS; i += 1) {
+                result.add(materialList.get(column + i * ROWS));
+            }
+            return result;
         }
         ROWS:
-        for (int row = 0; row < 5; row += 1) {
-            for (int column = 0; column < 5; column += 1) {
-                if (!completeList.get(column + row * 5)) {
+        for (int row = 0; row < ROWS; row += 1) {
+            for (int column = 0; column < ROWS; column += 1) {
+                if (!completeList.get(column + row * ROWS)) {
                     continue ROWS;
                 }
             }
-            return List.of(materialList.get(0 + row * 5),
-                           materialList.get(1 + row * 5),
-                           materialList.get(2 + row * 5),
-                           materialList.get(3 + row * 5),
-                           materialList.get(4 + row * 5));
+            for (int i = 0; i < ROWS; i += 1) {
+                result.add(materialList.get(i + row * ROWS));
+            }
+            return result;
         }
         DIAG:
         do {
-            for (int i = 0; i < 5; i += 1) {
-                if (!completeList.get(i + i * 5)) {
+            for (int i = 0; i < ROWS; i += 1) {
+                if (!completeList.get(i + i * ROWS)) {
                     break DIAG;
                 }
             }
-            return List.of(materialList.get(0 + 0 * 5),
-                           materialList.get(1 + 1 * 5),
-                           materialList.get(2 + 2 * 5),
-                           materialList.get(3 + 3 * 5),
-                           materialList.get(4 + 4 * 5));
+            for (int i = 0; i < ROWS; i += 1) {
+                result.add(materialList.get(i + i * ROWS));
+            }
+            return result;
         } while (false);
         DIAG:
         do {
-            for (int i = 0; i < 5; i += 1) {
-                if (!completeList.get(i + (4 - i) * 5)) {
+            for (int i = 0; i < ROWS; i += 1) {
+                if (!completeList.get(i + (ROWS - i - 1) * ROWS)) {
                     break DIAG;
                 }
             }
-            return List.of(materialList.get(0 + 4 * 5),
-                           materialList.get(1 + 3 * 5),
-                           materialList.get(2 + 2 * 5),
-                           materialList.get(3 + 1 * 5),
-                           materialList.get(4 + 0 * 5));
+            for (int i = 0; i < ROWS; i += 1) {
+                result.add(materialList.get(i + (ROWS - i - 1) * ROWS));
+            }
+            return result;
         } while (false);
         return null;
     }
@@ -87,7 +85,7 @@ public final class PlayerTag {
     public void roll(List<Material> allMaterials, Random random) {
         Collections.shuffle(allMaterials, random);
         materialList.clear();
-        for (int i = 0; i < 25; i += 1) {
+        for (int i = 0; i < ROWS * ROWS; i += 1) {
             materialList.add(allMaterials.get(i));
         }
     }
