@@ -168,6 +168,11 @@ public final class BingoPlugin extends JavaPlugin {
                     Material.RABBIT_STEW,
                     Material.MUSHROOM_STEW,
                     Material.SUSPICIOUS_STEW,
+                    // May 2023
+                    Material.COD,
+                    Material.SALMON,
+                    Material.PUFFERFISH,
+                    Material.TROPICAL_FISH,
                 }));
         set.addAll(Tag.FLOWERS.getValues());
         set.addAll(Tag.SAPLINGS.getValues());
