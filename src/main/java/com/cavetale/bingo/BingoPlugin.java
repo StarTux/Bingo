@@ -9,7 +9,6 @@ import com.cavetale.mytems.Mytems;
 import com.cavetale.mytems.MytemsCategory;
 import com.cavetale.mytems.MytemsTag;
 import com.cavetale.mytems.item.trophy.TrophyCategory;
-import com.cavetale.mytems.util.Items;
 import com.destroystokyo.paper.MaterialTags;
 import com.winthier.title.TitlePlugin;
 import java.io.File;
@@ -36,6 +35,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
+import static com.cavetale.mytems.util.Items.tooltip;
 import static net.kyori.adventure.text.Component.empty;
 import static net.kyori.adventure.text.Component.join;
 import static net.kyori.adventure.text.Component.newline;
@@ -280,8 +280,8 @@ public final class BingoPlugin extends JavaPlugin {
             for (int row = 0; row < ROWS; row += 1) {
                 int guiIndex = 2 + column + row * 9;
                 if (playerTag.getMaterialList().isEmpty()) {
-                    gui.setItem(guiIndex, Items.text(Mytems.CHECKBOX.createItemStack(),
-                                                     List.of(text("?", GREEN))));
+                    gui.setItem(guiIndex, tooltip(Mytems.CHECKBOX.createItemStack(),
+                                                  List.of(text("?", GREEN))));
                 } else {
                     Material material = playerTag.getMaterialList().get(column + row * ROWS);
                     gui.setItem(guiIndex, new ItemStack(material));
