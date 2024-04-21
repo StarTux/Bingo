@@ -3,6 +3,7 @@ package com.cavetale.bingo;
 import com.cavetale.bingo.save.PlayerTag;
 import com.cavetale.bingo.save.SaveTag;
 import com.cavetale.core.font.GuiOverlay;
+import com.cavetale.core.money.Money;
 import com.cavetale.core.util.Json;
 import com.cavetale.fam.trophy.Highscore;
 import com.cavetale.mytems.Mytems;
@@ -420,6 +421,7 @@ public final class BingoPlugin extends JavaPlugin {
             String cmd = "titles unlockset " + player.getName() + " " + String.join(" ", titles);
             getLogger().info("Dispatching command: " + cmd);
             Bukkit.dispatchCommand(Bukkit.getConsoleSender(), cmd);
+            Money.get().give(player.getUniqueId(), 1000.0, this, "Bingo");
         }
         // Random reward
         List<Mytems> list = MytemsTag.of(MytemsCategory.MUSIC).getMytems();
