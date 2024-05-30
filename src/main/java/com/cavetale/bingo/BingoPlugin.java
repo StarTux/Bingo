@@ -140,7 +140,7 @@ public final class BingoPlugin extends JavaPlugin {
                     Material.FERMENTED_SPIDER_EYE,
                     Material.MOSS_BLOCK,
                     Material.NETHERITE_PICKAXE,
-                    Material.SCUTE,
+                    Material.TURTLE_SCUTE,
                     Material.SHROOMLIGHT,
                     Material.AZALEA,
                     Material.FLOWERING_AZALEA,
