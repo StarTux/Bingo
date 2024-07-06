@@ -69,6 +69,7 @@ public final class BingoPlugin extends JavaPlugin {
             new ItemStack(Material.WOODEN_SHOVEL),
             new ItemStack(Material.WOODEN_SWORD),
             new ItemStack(Material.BREAD, 16),
+            Mytems.MAGIC_MAP.createItemStack(),
         });
     public static final int ROWS = 6;
     protected static final Component BINGO = textOfChildren(text("B", color(0xff4500)),
