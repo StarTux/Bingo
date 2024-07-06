@@ -178,6 +178,8 @@ public final class BingoPlugin extends JavaPlugin {
                     Material.GOAT_HORN,
                     Material.ECHO_SHARD,
                     Material.RECOVERY_COMPASS,
+                    // 1.20.6, July 2024
+                    Material.ARMADILLO_SCUTE,
                 }));
         set.addAll(Tag.FLOWERS.getValues());
         set.addAll(Tag.SAPLINGS.getValues());
