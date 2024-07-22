@@ -69,6 +69,7 @@ public final class BingoPlugin extends JavaPlugin {
             new ItemStack(Material.WOODEN_SHOVEL),
             new ItemStack(Material.WOODEN_SWORD),
             new ItemStack(Material.BREAD, 16),
+            Mytems.MAGIC_MAP.createItemStack(),
         });
     public static final int ROWS = 6;
     protected static final Component BINGO = textOfChildren(text("B", color(0xff4500)),
@@ -178,6 +179,8 @@ public final class BingoPlugin extends JavaPlugin {
                     Material.GOAT_HORN,
                     Material.ECHO_SHARD,
                     Material.RECOVERY_COMPASS,
+                    // 1.20.6, July 2024
+                    Material.ARMADILLO_SCUTE,
                 }));
         set.addAll(Tag.FLOWERS.getValues());
         set.addAll(Tag.SAPLINGS.getValues());
