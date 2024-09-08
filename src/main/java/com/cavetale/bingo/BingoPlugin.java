@@ -64,13 +64,6 @@ public final class BingoPlugin extends JavaPlugin {
                                                        "Battleship",
                                                        "AxolotlBucket",
                                                        "TropicalFishBucket");
-    private final List<ItemStack> starterKit = List.of(new ItemStack[] {
-            new ItemStack(Material.WOODEN_PICKAXE),
-            new ItemStack(Material.WOODEN_SHOVEL),
-            new ItemStack(Material.WOODEN_SWORD),
-            new ItemStack(Material.BREAD, 16),
-            Mytems.MAGIC_MAP.createItemStack(),
-        });
     public static final int ROWS = 6;
     protected static final Component BINGO = textOfChildren(text("B", color(0xff4500)),
                                                             text("i", color(0xffa500)),
@@ -368,7 +361,7 @@ public final class BingoPlugin extends JavaPlugin {
                                          SoundCategory.MASTER, 1.0f, 2.0f);
                         openGui(player);
                         if (playerTag.getCompletionCount() == 0) {
-                            for (ItemStack item : starterKit) {
+                            for (ItemStack item : getStarterKit()) {
                                 player.getInventory().addItem(item.clone());
                             }
                         }
@@ -394,6 +387,14 @@ public final class BingoPlugin extends JavaPlugin {
                 player.playSound(player.getLocation(), Sound.BLOCK_LEVER_CLICK, SoundCategory.MASTER, 0.25f, 2.0f);
             }
         }.runTaskTimer(this, 1L, 1L);
+    }
+
+    private List<ItemStack> getStarterKit() {
+        return List.of(new ItemStack(Material.WOODEN_PICKAXE),
+                       new ItemStack(Material.WOODEN_SHOVEL),
+                       new ItemStack(Material.WOODEN_SWORD),
+                       new ItemStack(Material.BREAD, 16),
+                       Mytems.MAGIC_MAP.createItemStack());
     }
 
     protected void onPlayerHasBingo(Player player, PlayerTag playerTag) {
