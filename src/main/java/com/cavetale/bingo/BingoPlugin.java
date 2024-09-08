@@ -64,7 +64,7 @@ public final class BingoPlugin extends JavaPlugin {
                                                        "Battleship",
                                                        "AxolotlBucket",
                                                        "TropicalFishBucket");
-    private static final List<ItemStack> STARTER_KIT = List.of(new ItemStack[] {
+    private final List<ItemStack> starterKit = List.of(new ItemStack[] {
             new ItemStack(Material.WOODEN_PICKAXE),
             new ItemStack(Material.WOODEN_SHOVEL),
             new ItemStack(Material.WOODEN_SWORD),
@@ -368,7 +368,7 @@ public final class BingoPlugin extends JavaPlugin {
                                          SoundCategory.MASTER, 1.0f, 2.0f);
                         openGui(player);
                         if (playerTag.getCompletionCount() == 0) {
-                            for (ItemStack item : STARTER_KIT) {
+                            for (ItemStack item : starterKit) {
                                 player.getInventory().addItem(item.clone());
                             }
                         }
