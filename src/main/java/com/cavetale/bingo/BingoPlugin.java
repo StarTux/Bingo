@@ -174,12 +174,23 @@ public final class BingoPlugin extends JavaPlugin {
                     Material.RECOVERY_COMPASS,
                     // 1.20.6, July 2024
                     Material.ARMADILLO_SCUTE,
+                    // 1.21
+                    Material.COPPER_BULB,
+                    Material.CRAFTER,
+                    // 1.21.2
+                    Material.BUNDLE,
+                    // 1.21.4
+                    Material.CREAKING_HEART,
+                    Material.PALE_MOSS_BLOCK,
+                    Material.RESIN_BRICK,
                 }));
         set.addAll(Tag.FLOWERS.getValues());
         set.addAll(Tag.SAPLINGS.getValues());
         set.addAll(Tag.LEAVES.getValues());
         set.addAll(MaterialTags.MUSHROOMS.getValues());
         set.addAll(MaterialTags.MUSHROOM_BLOCKS.getValues());
+        set.addAll(Tag.ITEMS_BOATS.getValues());
+        set.addAll(Tag.ITEMS_HANGING_SIGNS.getValues());
         set.removeIf(m -> !m.isItem());
         materialList.addAll(set);
     }
