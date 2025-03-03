@@ -23,6 +23,7 @@ import static net.kyori.adventure.text.Component.join;
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.JoinConfiguration.noSeparators;
 import static net.kyori.adventure.text.format.NamedTextColor.*;
+import static net.kyori.adventure.text.format.TextDecoration.*;
 
 @RequiredArgsConstructor
 public final class EventListener implements Listener {
@@ -48,7 +49,14 @@ public final class EventListener implements Listener {
         PlayerTag playerTag = plugin.getPlayerTag(player);
         List<Component> lines = new ArrayList<>();
         lines.add(join(noSeparators(), text("/", YELLOW), plugin.BINGO));
-        lines.add(plugin.getSubtitle(playerTag));
+        if (plugin.saveTag.getEndTime() > 0L) {
+            lines.add(plugin.getTimeLeftComponent());
+        }
+        if (plugin.saveTag.isPause()) {
+            lines.add(text("Paused", GRAY, ITALIC));
+        } else {
+            lines.add(plugin.getSubtitle(playerTag));
+        }
         if (plugin.saveTag.isEvent()) {
             lines.addAll(plugin.highscoreLines);
         }

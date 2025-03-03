@@ -3,6 +3,7 @@ package com.cavetale.bingo;
 import com.cavetale.bingo.save.PlayerTag;
 import com.cavetale.bingo.save.SaveTag;
 import com.cavetale.core.font.GuiOverlay;
+import com.cavetale.core.font.Unicode;
 import com.cavetale.core.money.Money;
 import com.cavetale.core.util.Json;
 import com.cavetale.fam.trophy.Highscore;
@@ -24,6 +25,7 @@ import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
+import lombok.Getter;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Bukkit;
@@ -49,6 +51,7 @@ import static net.kyori.adventure.text.format.TextColor.color;
 import static net.kyori.adventure.title.Title.Times.times;
 import static net.kyori.adventure.title.Title.title;
 
+@Getter
 public final class BingoPlugin extends JavaPlugin {
     protected BingoCommand bingoCommand = new BingoCommand(this);
     protected BingoAdminCommand bingoAdminCommand = new BingoAdminCommand(this);
@@ -72,6 +75,7 @@ public final class BingoPlugin extends JavaPlugin {
                                                             text("o", color(0xcd5c5c)),
                                                             text("!", color(0xffd700)))
         .decorate(TextDecoration.BOLD);
+    private Component timeLeftComponent = text("N/A", DARK_RED);
 
     private void buildMaterialList() {
         materialList.clear();
@@ -189,7 +193,7 @@ public final class BingoPlugin extends JavaPlugin {
         set.addAll(Tag.LEAVES.getValues());
         set.addAll(MaterialTags.MUSHROOMS.getValues());
         set.addAll(MaterialTags.MUSHROOM_BLOCKS.getValues());
-        set.addAll(Tag.ITEMS_BOATS.getValues());
+        set.addAll(Tag.ITEMS_CHEST_BOATS.getValues());
         set.addAll(Tag.ITEMS_HANGING_SIGNS.getValues());
         set.removeIf(m -> !m.isItem());
         materialList.addAll(set);
@@ -210,6 +214,7 @@ public final class BingoPlugin extends JavaPlugin {
                 getLogger().warning("Title not found: " + titleName);
             }
         }
+        Bukkit.getScheduler().runTaskTimer(this, this::onTick, 0L, 1L);
     }
 
     @Override
@@ -217,6 +222,27 @@ public final class BingoPlugin extends JavaPlugin {
         saveSaveTag();
         playerTagMap.clear();
         Gui.disable(this);
+    }
+
+    private void onTick() {
+        final long endTime = saveTag.getEndTime();
+        if (endTime > 0L) {
+            final long now = System.currentTimeMillis();
+            if (now > endTime) {
+                saveTag.setPause(true);
+                timeLeftComponent = text("Ended", RED);
+                saveSaveTag();
+            } else {
+                final Duration duration = Duration.ofMillis(endTime - now);
+                timeLeftComponent = textOfChildren(text(Unicode.tiny("time "), GRAY),
+                                                   text(duration.toHours(), WHITE),
+                                                   text(Unicode.SMALLH.getString(), GRAY),
+                                                   text(duration.toMinutes() % 60, WHITE),
+                                                   text(Unicode.SMALLM.getString(), GRAY),
+                                                   text(duration.toSeconds() % 60, WHITE),
+                                                   text(Unicode.SMALLS.getString(), GRAY));
+            }
+        }
     }
 
     protected void loadSaveTag() {
@@ -261,8 +287,9 @@ public final class BingoPlugin extends JavaPlugin {
 
     public Component getSubtitle(PlayerTag playerTag) {
         return playerTag.getCompletionCount() == 0
-            ? text("Collect " + ROWS + " in a row!", WHITE)
-            : text("Run #" + ((playerTag.isCompleted() ? 0 : 1) + playerTag.getCompletionCount()), WHITE);
+            ? text("Collect " + ROWS + " in a row!", GREEN)
+            : textOfChildren(text(Unicode.tiny("run "), GRAY),
+                             text("#" + ((playerTag.isCompleted() ? 0 : 1) + playerTag.getCompletionCount()), GOLD));
     }
 
     public void openGui(Player player) {

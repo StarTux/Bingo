@@ -10,6 +10,7 @@ public final class SaveTag {
     protected Map<UUID, Integer> scores = new HashMap<>();
     protected boolean event;
     protected boolean pause;
+    protected long endTime;
 
     public void addScore(UUID uuid, int value) {
         int old = scores.getOrDefault(uuid, 0);

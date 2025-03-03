@@ -39,6 +39,10 @@ public final class BingoAdminCommand extends AbstractCommand<BingoPlugin> {
             .description("Toggle pause")
             .completers(CommandArgCompleter.BOOLEAN)
             .senderCaller(this::pause);
+        rootNode.addChild("start").arguments("<minutes>")
+            .description("Start timed game")
+            .completers(CommandArgCompleter.integer(i -> i > 0))
+            .senderCaller(this::start);
     }
 
     private void give(Player player) {
@@ -88,13 +92,25 @@ public final class BingoAdminCommand extends AbstractCommand<BingoPlugin> {
         if (args.length >= 1) {
             boolean value = CommandArgCompleter.requireBoolean(args[0]);
             plugin.saveTag.setPause(value);
+            plugin.saveTag.setEndTime(0L);
             plugin.saveSaveTag();
         }
         if (plugin.saveTag.isPause()) {
-            sender.sendMessage(text("Pause mode enabled", AQUA));
+            sender.sendMessage(text("Pause mode enabled, end time reset", AQUA));
         } else {
-            sender.sendMessage(text("Pause mode disabled", RED));
+            sender.sendMessage(text("Pause mode disabled, end time reset", RED));
         }
+        return true;
+    }
+
+    private boolean start(CommandSender sender, String[] args) {
+        if (args.length != 1) return false;
+        final int minutes = CommandArgCompleter.requireInt(args[0], i -> i > 0);
+        final long then = System.currentTimeMillis() + ((long) minutes * 1000L * 60L);
+        plugin.getSaveTag().setEndTime(then);
+        plugin.getSaveTag().setPause(false);
+        plugin.saveSaveTag();
+        sender.sendMessage(text("Timed game started", YELLOW));
         return true;
     }
 }
