@@ -476,12 +476,4 @@ public final class BingoPlugin extends JavaPlugin {
         highscore = Highscore.of(saveTag.getScores());
         highscoreLines = Highscore.sidebar(highscore, TrophyCategory.MEDAL);
     }
-
-    protected int rewardHighscore() {
-        return Highscore.reward(saveTag.getScores(),
-                                "bingo_event",
-                                TrophyCategory.MEDAL,
-                                BINGO,
-                                hi -> "You completed " + hi.score + " Bingo card" + (hi.score == 1 ? "" : "s"));
-    }
 }
