@@ -187,6 +187,23 @@ public final class BingoPlugin extends JavaPlugin {
                     Material.CREAKING_HEART,
                     Material.PALE_MOSS_BLOCK,
                     Material.RESIN_BRICK,
+                    // 1.21.9 1.21.10
+                    Material.COPPER_CHEST,
+                    Material.COPPER_BARS,
+                    Material.COPPER_LANTERN,
+                    Material.COPPER_TORCH,
+                    Material.OAK_SHELF,
+                    Material.SPRUCE_SHELF,
+                    Material.BIRCH_SHELF,
+                    Material.JUNGLE_SHELF,
+                    Material.ACACIA_SHELF,
+                    Material.DARK_OAK_SHELF,
+                    Material.MANGROVE_SHELF,
+                    Material.CHERRY_SHELF,
+                    Material.PALE_OAK_SHELF,
+                    Material.BAMBOO_SHELF,
+                    Material.CRIMSON_SHELF,
+                    Material.WARPED_SHELF,
                 }));
         set.addAll(Tag.FLOWERS.getValues());
         set.addAll(Tag.SAPLINGS.getValues());
