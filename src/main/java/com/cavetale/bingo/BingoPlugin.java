@@ -187,6 +187,10 @@ public final class BingoPlugin extends JavaPlugin {
                     Material.CREAKING_HEART,
                     Material.PALE_MOSS_BLOCK,
                     Material.RESIN_BRICK,
+                    // 1.21.5
+                    Material.FIREFLY_BUSH,
+                    Material.CACTUS_FLOWER,
+                    Material.LEAF_LITTER,
                     // 1.21.9 1.21.10
                     Material.COPPER_CHEST,
                     Material.COPPER_BARS,
