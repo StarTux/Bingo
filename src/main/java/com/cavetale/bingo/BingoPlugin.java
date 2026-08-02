@@ -204,6 +204,12 @@ public final class BingoPlugin extends JavaPlugin {
                     Material.BAMBOO_SHELF,
                     Material.CRIMSON_SHELF,
                     Material.WARPED_SHELF,
+                    // 26.1
+                    Material.GOLDEN_DANDELION,
+                    // 26.2
+                    Material.CINNABAR,
+                    Material.SULFUR,
+                    Material.SULFUR_CUBE_BUCKET,
                 }));
         set.addAll(Tag.FLOWERS.getValues());
         set.addAll(Tag.SAPLINGS.getValues());
