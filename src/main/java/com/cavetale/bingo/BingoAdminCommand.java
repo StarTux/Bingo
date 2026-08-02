@@ -5,6 +5,7 @@ import com.cavetale.core.command.CommandArgCompleter;
 import com.cavetale.core.playercache.PlayerCache;
 import com.cavetale.fam.trophy.Highscore;
 import com.cavetale.mytems.item.trophy.TrophyCategory;
+import com.winthier.kit.Kits;
 import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -69,6 +70,7 @@ public final class BingoAdminCommand extends AbstractCommand<BingoPlugin> {
         );
         sender.sendMessage(text(count + " highscores rewarded", AQUA));
         Highscore.rewardMoneyWithFeedback(sender, plugin, plugin.getSaveTag().getScores(), "Bingo!");
+        Kits.autoCreateKit(sender, "bingo", plugin.getSaveTag().getScores().keySet());
     }
 
     private boolean addScore(CommandSender sender, String[] args) {
