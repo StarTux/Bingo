@@ -214,6 +214,7 @@ public final class BingoPlugin extends JavaPlugin {
                     Material.CINNABAR,
                     Material.SULFUR,
                     Material.SULFUR_CUBE_BUCKET,
+                    Material.SULFUR_SPIKE,
                 }));
         set.addAll(Tag.FLOWERS.getValues());
         set.addAll(Tag.SAPLINGS.getValues());
