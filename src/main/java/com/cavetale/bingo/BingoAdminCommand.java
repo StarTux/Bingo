@@ -77,7 +77,7 @@ public final class BingoAdminCommand extends AbstractCommand<BingoPlugin> {
         if (args.length != 2) return false;
         PlayerCache target = PlayerCache.require(args[0]);
         int score = CommandArgCompleter.requireInt(args[1], i -> i != 0);
-        plugin.saveTag.addScore(target.uuid, score);
+        plugin.getSaveTag().addScore(target.uuid, score);
         plugin.computeHighscore();
         sender.sendMessage(text("Score of " + target.name + " added: " + score, AQUA));
         return true;
@@ -87,10 +87,10 @@ public final class BingoAdminCommand extends AbstractCommand<BingoPlugin> {
         if (args.length > 1) return false;
         if (args.length >= 1) {
             boolean value = CommandArgCompleter.requireBoolean(args[0]);
-            plugin.saveTag.setEvent(value);
+            plugin.getSaveTag().setEvent(value);
             plugin.saveSaveTag();
         }
-        if (plugin.saveTag.isEvent()) {
+        if (plugin.getSaveTag().isEvent()) {
             sender.sendMessage(text("Event mode enabled", AQUA));
         } else {
             sender.sendMessage(text("Event mode disabled", RED));
@@ -102,11 +102,11 @@ public final class BingoAdminCommand extends AbstractCommand<BingoPlugin> {
         if (args.length > 1) return false;
         if (args.length >= 1) {
             boolean value = CommandArgCompleter.requireBoolean(args[0]);
-            plugin.saveTag.setPause(value);
-            plugin.saveTag.setEndTime(0L);
+            plugin.getSaveTag().setPause(value);
+            plugin.getSaveTag().setEndTime(0L);
             plugin.saveSaveTag();
         }
-        if (plugin.saveTag.isPause()) {
+        if (plugin.getSaveTag().isPause()) {
             sender.sendMessage(text("Pause mode enabled, end time reset", AQUA));
         } else {
             sender.sendMessage(text("Pause mode disabled, end time reset", RED));

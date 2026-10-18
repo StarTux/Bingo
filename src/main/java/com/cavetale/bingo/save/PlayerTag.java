@@ -11,11 +11,11 @@ import static com.cavetale.bingo.BingoPlugin.ROWS;
 
 @Data
 public final class PlayerTag {
-    protected boolean completed;
-    protected boolean memberListed;
-    protected int completionCount;
-    protected List<Material> materialList = new ArrayList<>();
-    protected List<Boolean> completeList = new ArrayList<>();
+    private boolean completed;
+    private boolean memberListed;
+    private int completionCount;
+    private List<Material> materialList = new ArrayList<>();
+    private List<Boolean> completeList = new ArrayList<>();
 
     public List<Material> findBingo() {
         if (completeList.isEmpty()) return null;
@@ -75,11 +75,32 @@ public final class PlayerTag {
         return findBingo() != null;
     }
 
-    public void buildCompleteList(Player player) {
+    /**
+     * Build the list based on items in the player inventory or ender chest.
+     */
+    public void buildCompleteItemList(Player player) {
         completeList.clear();
         for (Material mat : materialList) {
             completeList.add(player.getInventory().contains(mat) || player.getEnderChest().contains(mat));
         }
+    }
+
+    /**
+     * Set a material as completed.
+     * @return true if the material was changed to a new value. False
+     *   if the value is unchanged or the material was not found in
+     *   the material list.
+     */
+    public boolean setMaterial(final Material material, final boolean value) {
+        for (int i = 0; i < materialList.size(); i += 1) {
+            if (materialList.get(i) == material) {
+                final boolean oldValue = completeList.get(i);
+                if (oldValue == value) return false;
+                completeList.set(i, value);
+                return true;
+            }
+        }
+        return false;
     }
 
     public void roll(List<Material> allMaterials, Random random) {
@@ -87,6 +108,7 @@ public final class PlayerTag {
         materialList.clear();
         for (int i = 0; i < ROWS * ROWS; i += 1) {
             materialList.add(allMaterials.get(i));
+            completeList.add(false);
         }
     }
 }

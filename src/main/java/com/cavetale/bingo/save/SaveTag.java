@@ -7,10 +7,12 @@ import lombok.Data;
 
 @Data
 public final class SaveTag {
-    protected Map<UUID, Integer> scores = new HashMap<>();
-    protected boolean event;
-    protected boolean pause;
-    protected long endTime;
+    private Map<UUID, Integer> scores = new HashMap<>();
+    private boolean event;
+    private boolean pause;
+    private long endTime;
+    private boolean useItems = false;
+    private boolean useBlocks = true;
 
     public void addScore(UUID uuid, int value) {
         int old = scores.getOrDefault(uuid, 0);
