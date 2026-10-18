@@ -102,7 +102,7 @@ public final class EventListener implements Listener {
         );
     }
 
-    @EventHandler
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGH)
     private void onBlockBreak(BlockBreakEvent event) {
         if (plugin.getSaveTag().isPause()) return;
         if (!plugin.getSaveTag().isUseBlocks()) return;
