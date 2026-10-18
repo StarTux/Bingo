@@ -131,6 +131,7 @@ public final class BlockMaterialList {
             // Misc
             Material.BRICKS, // Ocean ruins, plains village, trail ruins
             Material.BONE_BLOCK,
+            Material.CLAY,
         };
         final Set<Material> set = new HashSet<>();
         for (Material mat : mats) set.add(mat);
@@ -140,6 +141,7 @@ public final class BlockMaterialList {
         set.addAll(MaterialTags.MUSHROOM_BLOCKS.getValues());
         set.addAll(Tag.CORAL_BLOCKS.getValues());
         set.addAll(MaterialTags.ORES.getValues());
+        set.remove(Material.GOLDEN_DANDELION);
         for (Material mat : set) {
             if (!mat.isItem()) {
                 BingoPlugin.getInstance().getLogger().severe("[ItemMaterialList] " + mat + ": Not an item!");
