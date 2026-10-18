@@ -135,12 +135,10 @@ public final class BlockMaterialList {
         final Set<Material> set = new HashSet<>();
         for (Material mat : mats) set.add(mat);
         set.addAll(Tag.FLOWERS.getValues());
-        set.addAll(Tag.SAPLINGS.getValues());
         set.addAll(Tag.LEAVES.getValues());
         set.addAll(MaterialTags.MUSHROOMS.getValues());
         set.addAll(MaterialTags.MUSHROOM_BLOCKS.getValues());
         set.addAll(Tag.CORAL_BLOCKS.getValues());
-        set.addAll(MaterialTags.CORAL_FANS.getValues());
         set.addAll(MaterialTags.ORES.getValues());
         for (Material mat : set) {
             if (!mat.isItem()) {
