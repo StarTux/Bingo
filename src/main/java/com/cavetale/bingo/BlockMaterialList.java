@@ -39,6 +39,7 @@ public final class BlockMaterialList {
             Material.NETHERRACK,
             Material.SOUL_SAND,
             Material.NETHER_BRICKS,
+            Material.GLOWSTONE,
             // Soul Sand Valley
             Material.SOUL_SOIL,
             Material.BONE_BLOCK,
