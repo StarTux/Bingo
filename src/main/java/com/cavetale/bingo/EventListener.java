@@ -115,6 +115,9 @@ public final class EventListener implements Listener {
         if (success) {
             player.playSound(player, Sound.ENTITY_PLAYER_LEVELUP, SoundCategory.MASTER, 0.5f, 2f);
             player.sendMessage(textOfChildren(plugin.BINGO, text(" You collected " + block.getType().getKey().getKey().replace("_", " ") + "!", GREEN)));
+            if (plugin.getSaveTag().isEvent()) {
+                plugin.getSaveTag().addScore(player.getUniqueId(), 1);
+            }
         }
     }
 }

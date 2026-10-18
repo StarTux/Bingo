@@ -245,7 +245,7 @@ public final class BingoPlugin extends JavaPlugin {
             playerTag.setCompletionCount(playerTag.getCompletionCount() + 1);
             savePlayerTag(player.getUniqueId(), playerTag);
             if (saveTag.isEvent()) {
-                saveTag.getScores().put(player.getUniqueId(), playerTag.getCompletionCount());
+                saveTag.addScore(player.getUniqueId(), 10);
                 computeHighscore();
                 saveSaveTag();
             }
