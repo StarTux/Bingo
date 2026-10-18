@@ -66,7 +66,7 @@ public final class BingoAdminCommand extends AbstractCommand<BingoPlugin> {
             "bingo_event",
             TrophyCategory.MEDAL,
             plugin.BINGO,
-            hi -> "You completed " + hi.score + " Bingo card" + (hi.score == 1 ? "" : "s")
+            hi -> "You scored " + hi.score + " Bingo point" + (hi.score == 1 ? "" : "s")
         );
         sender.sendMessage(text(count + " highscores rewarded", AQUA));
         Highscore.rewardMoneyWithFeedback(sender, plugin, plugin.getSaveTag().getScores(), "Bingo!");
